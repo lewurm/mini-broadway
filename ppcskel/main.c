@@ -12,23 +12,23 @@ Copyright (C) 2009              John Kelley <wiidev@kelley.ca>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
-#include "string.h"
-#include "ipc.h"
-#include "mini_ipc.h"
+#include <broadway/bootmii_ppc.h>
+#include <string.h>
+#include <broadway/ipc.h>
+#include <broadway/mini_ipc.h>
 #include "nandfs.h"
 #include "fat.h"
-#include "malloc.h"
+#include <malloc.h>
 #include "diskio.h"
-#include "printf.h"
+#include <printf.h>
 #include "video_low.h"
 #include "input.h"
 #include "console.h"
-#include "irq.h"
+#include <broadway/irq.h>
 #include "usb/core/core.h"
 #include "usb/drivers/class/hid.h"
 #include "sha1.h"
-#include "hollywood.h"
+#include <broadway/hollywood.h>
 
 #define MINIMUM_MINI_VERSION 0x00010001
 

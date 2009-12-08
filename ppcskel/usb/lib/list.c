@@ -33,9 +33,9 @@
  */
 //#include <stdlib.h>
 #include "list.h"
-#include "../../malloc.h"
-#include "../../string.h"
-#include "../../bootmii_ppc.h"
+#include <malloc.h>
+#include <string.h>
+#include <broadway/bootmii_ppc.h>
 
 struct list* list_create()
 {

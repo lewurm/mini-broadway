@@ -17,10 +17,10 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 #define OK 0
 #define EFAIL 1
 
-#define MEM2_BSS __attribute__ ((section (".bss.mem2")))
-#define MEM2_DATA __attribute__ ((section (".data.mem2")))
-#define MEM2_RODATA __attribute__ ((section (".rodata.mem2")))
-#define ALIGNED(x) __attribute__((aligned(x)))
+#define MEM2_BSS	__attribute__ ((section (".bss.mem2")))
+#define MEM2_DATA	__attribute__ ((section (".data.mem2")))
+#define MEM2_RODATA	__attribute__ ((section (".rodata.mem2")))
+#define ALIGNED(x)	__attribute__ ((aligned(x)))
 
 #define STACK_ALIGN(type, name, cnt, alignment)         \
 	u8 _al__##name[((sizeof(type)*(cnt)) + (alignment) + \
@@ -29,14 +29,11 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 	type *name = (type*)(((u32)(_al__##name)) + ((alignment) - (( \
 	(u32)(_al__##name))&((alignment)-1))))
 
-// Basic I/O.
-
+/* Basic I/O. */
 static inline u32 read32(u32 addr)
 {
 	u32 x;
-
 	asm volatile("lwz %0,0(%1) ; sync" : "=r"(x) : "b"(0xc0000000 | addr));
-
 	return x;
 }
 
@@ -63,9 +60,7 @@ static inline void mask32(u32 addr, u32 clear, u32 set)
 static inline u16 read16(u32 addr)
 {
 	u16 x;
-
 	asm volatile("lhz %0,0(%1) ; sync" : "=r"(x) : "b"(0xc0000000 | addr));
-
 	return x;
 }
 
@@ -75,8 +70,7 @@ static inline void write16(u32 addr, u16 x)
 }
 
 
-// Address mapping.
-
+/* Address mapping. */
 static inline u32 virt_to_phys(const void *p)
 {
 	return (u32)p & 0x7fffffff;
@@ -88,41 +82,35 @@ static inline void *phys_to_virt(u32 x)
 }
 
 
-// Cache synchronisation.
-
+/* Cache synchronisation. */
 void sync_before_read(void *p, u32 len);
 void sync_after_write(const void *p, u32 len);
 void sync_before_exec(const void *p, u32 len);
 
 
-// Time.
-
+/* Time. */
 void udelay(u32 us);
-u64 mftb(void);
+u64 getticks();
+#define mftb()	getticks()
 
-
-// Special purpose registers.
-
-#define mtspr(n, x) do { asm("mtspr %1,%0" : : "r"(x), "i"(n)); } while (0)
+/* Special purpose registers. */
+#define mtspr(n, x) asm("mtspr %1,%0" : : "r"(x), "i"(n))
 #define mfspr(n) ({ \
 	u32 x; asm volatile("mfspr %0,%1" : "=r"(x) : "i"(n)); x; \
 })
 
 
-// Exceptions.
-
+/* Exceptions. */
 void exception_init(void);
 
 
-// Console.
-
+/* Console. */
 void gecko_init(void);
 int printf(const char *fmt, ...);
 void hexdump(void *d, int len);
 
 
-// Debug: blink the tray led.
-
+/* Debug: blink the tray led. */
 static inline void blink(void)
 {
 	write32(0x0d8000c0, read32(0x0d8000c0) ^ 0x20);

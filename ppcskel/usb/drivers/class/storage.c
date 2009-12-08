@@ -38,7 +38,7 @@
 #include "../../core/core.h"
 #include "../../core/usb.h"
 #include "../../usbspec/usb11spec.h"
-#include "../../../malloc.h"
+#include <malloc.h>
 
 #include "storage.h"
 

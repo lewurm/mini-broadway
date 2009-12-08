@@ -47,7 +47,7 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #ifndef _USB_H_
 #define _USB_H_
 
-#include "../../types.h"
+#include <types.h>
 #include "core.h"
 
 

@@ -45,11 +45,10 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #ifndef _CORE_H_
 #define _CORE_H_
 
-#include "../../types.h"
+#include <types.h>
 #include "../lib/list.h"
 
-
-#include "../../bootmii_ppc.h"
+#include <broadway/bootmii_ppc.h>
 inline static void wait_ms(int ms)
 {
 	while(ms--)

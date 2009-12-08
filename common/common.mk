@@ -19,11 +19,18 @@ endif
 
 DEPDIR = .deps
 
+CFLAGS	+= -I$(WIIDEV)/include
+LDFLAGS	+= -L$(WIIDEV)/lib
+
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
+%.elf: $(OBJS) $(NOLINKOBJS)
 	@echo "  LINK      $@"
-	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+
+%.a: $(OBJS) $(NOLINKOBJS)
+	@echo "  ARCHIVE   $@"
+	@$(AR) rcs "$@" $(OBJS)
 
 ifneq ($(LDSCRIPT),)
 $(TARGET): $(LDSCRIPT)
@@ -44,7 +51,7 @@ endif
 
 clean:
 	rm -rf $(DEPDIR)
-	rm -f $(TARGET) $(TARGET).map $(OBJS)
+	rm -f $(TARGET) $(TARGET).map $(OBJS) $(NOLINKOBJS)
 
 define bin2o
 	@echo "  BIN2S     $(notdir $<)"

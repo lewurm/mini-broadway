@@ -12,7 +12,7 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #ifndef __OHCI_H__
 #define __OHCI_H__
 
-#include "../../types.h"
+#include <types.h>
 
 /* stolen from drivers/usb/host/ohci.h (linux-kernel) :) */
 

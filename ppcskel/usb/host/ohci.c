@@ -9,11 +9,11 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "../../bootmii_ppc.h"
-#include "../../hollywood.h"
-#include "../../irq.h"
-#include "../../string.h"
-#include "../../malloc.h"
+#include <broadway/bootmii_ppc.h>
+#include <broadway/hollywood.h>
+#include <broadway/irq.h>
+#include <string.h>
+#include <malloc.h>
 #include "ohci.h"
 #include "host.h"
 #include "../usbspec/usb11spec.h"
@@ -454,7 +454,7 @@ void hcdi_init(u32 reg)
 	   now we're in the SUSPEND state ... must go OPERATIONAL
 	   within 2msec else HC enters RESUME */
 
-	u32 cookie = irq_kill();
+	u32 was_on = irq_disable();
 
 	/* Tell the controller where the control and bulk lists are
 	 * The lists are empty now. */
@@ -493,7 +493,7 @@ void hcdi_init(u32 reg)
 	wait_ms ((read32(reg+OHCI_HC_RH_DESCRIPTOR_A) >> 23) & 0x1fe);
 
 	configure_ports((u8)1, reg);
-	irq_restore(cookie);
+	irq_restore(was_on);
 
 	dbg_op_state(reg);
 }

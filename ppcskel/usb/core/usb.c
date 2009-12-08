@@ -49,8 +49,8 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #include "core.h"
 #include "../host/host.h"
 #include "../usbspec/usb11spec.h"
-#include "../../malloc.h"
-#include "../../string.h"
+#include <malloc.h>
+#include <string.h>
 
 #define cleargbuf() memset(gbuf, 0, 0xffff)
 /* internal global buffer */

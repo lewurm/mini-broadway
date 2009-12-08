@@ -14,12 +14,12 @@ A million repetitions of "a"
 
 #define SHA1HANDSOFF
 
-#include "string.h"
+#include <string.h>
 #include "sha1.h"
-#include "bootmii_ppc.h"
-#include "hollywood.h"
-#include "malloc.h"
-#include "types.h"
+#include <broadway/bootmii_ppc.h>
+#include <broadway/hollywood.h>
+#include <malloc.h>
+#include <types.h>
 
 //should be divisibly by four
 #define BLOCKSIZE 32

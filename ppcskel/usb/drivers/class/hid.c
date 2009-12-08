@@ -12,8 +12,8 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #include "../../core/core.h"
 #include "../../core/usb.h"
 #include "../../usbspec/usb11spec.h"
-#include "../../../malloc.h"
-#include "../../../string.h"
+#include <malloc.h>
+#include <string.h>
 
 #include "hid.h"
 

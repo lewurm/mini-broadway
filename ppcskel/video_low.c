@@ -14,9 +14,9 @@ Some routines and initialization constants originally came from the
 of Crazy Nation and the GC Linux project.
 */
 
-#include "bootmii_ppc.h"
+#include <broadway/bootmii_ppc.h>
 #include "video_low.h"
-#include "string.h"
+#include <string.h>
 
 #ifdef VI_DEBUG
 #define  VI_debug(f, arg...) printf("VI: " f, ##arg);

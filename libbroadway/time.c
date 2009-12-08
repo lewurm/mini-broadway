@@ -10,29 +10,25 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 
 #include "bootmii_ppc.h"
 
-// Timebase frequency is bus frequency / 4.  Ignore roundoff, this
-// doesn't have to be very accurate.
-#define TICKS_PER_USEC (243/4)
+/* Timebase frequency is bus frequency / 4.  Ignore roundoff, this
+ * doesn't have to be very accurate. */
+#define TICKS_PER_USEC (243 / 4)
 
-u64 mftb(void)
+u64 getticks(void)
 {
-  u32 hi, lo, dum;
-  
-  asm("0: mftbu %0 ; mftb %1 ; mftbu %2 ; cmplw %0,%2 ; bne 0b" 
-      : "=r"(hi), "=r"(lo), "=r"(dum)); 
-  return ((u64)hi << 32) | lo;
+	u32 hi, lo, dum;
+	
+	asm("0: mftbu %0 ; mftb %1 ; mftbu %2 ; cmplw %0,%2 ; bne 0b" : "=r"(hi), "=r"(lo), "=r"(dum)); 
+	return ((u64)hi << 32) | lo;
 }
 
 static void __delay(u64 ticks)
 {
 	u64 start = mftb();
-
-	while (mftb() - start < ticks)
-		;
+	while (mftb() - start < ticks);
 }
 
 void udelay(u32 us)
 {
 	__delay(TICKS_PER_USEC * (u64)us);
 }
-

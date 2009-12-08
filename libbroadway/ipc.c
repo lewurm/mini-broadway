@@ -73,13 +73,13 @@ static inline void poke_intail(u16 num)
 }
 static inline void poke_outhead(u16 num)
 {
-	mask32(HW_IPC_PPCMSG, 0xFFFF0000, num<<16);
+	mask32(HW_IPC_PPCMSG, 0xFFFF0000, num << 16);
 }
 
 int ipc_initialize(void)
 {
 
-	infohdr = (ipc_infohdr*)(read32(0x13fffffc)|0x80000000);
+	infohdr = (ipc_infohdr*)(phys_to_virt(read32(0x13FFFFFC)));
 	sync_before_read((void*)infohdr, sizeof(ipc_infohdr));
 
 	printf("IPC: infoheader at %p %08x\n", infohdr);
@@ -93,13 +93,13 @@ int ipc_initialize(void)
 		return -1;
 	}
 
-	in_queue = (void*)(((u32)infohdr->ipc_in)|0x80000000);
-	out_queue = (void*)(((u32)infohdr->ipc_out)|0x80000000);
+	in_queue = phys_to_virt((u32)infohdr->ipc_in);
+	out_queue = phys_to_virt((u32)infohdr->ipc_out);
 
 	in_size = infohdr->ipc_in_size;
 	out_size = infohdr->ipc_out_size;
 
-	in_tail = read32(HW_IPC_PPCMSG) & 0xffff;
+	in_tail = read32(HW_IPC_PPCMSG) & 0xFFFF;
 	out_head = read32(HW_IPC_PPCMSG) >> 16;
 
 	printf("IPC: initial in tail: %d, out head: %d\n", in_tail, out_head);

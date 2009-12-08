@@ -10,11 +10,11 @@ Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
-#include "ipc.h"
-#include "mini_ipc.h"
+#include <broadway/bootmii_ppc.h>
+#include <broadway/ipc.h>
+#include <broadway/mini_ipc.h>
 #include "nandfs.h"
-#include "string.h"
+#include <string.h>
 
 #define	PAGE_SIZE	2048
 #define NANDFS_FREE 	0xFFFE

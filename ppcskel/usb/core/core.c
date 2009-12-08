@@ -47,9 +47,9 @@ Copyright (C) 2009     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
 #include "usb.h"
 #include "../usbspec/usb11spec.h"
 #include "../lib/list.h"
-#include "../../malloc.h"
-#include "../../bootmii_ppc.h" //printf
-#include "../../string.h" //memset
+#include <malloc.h>
+#include <broadway/bootmii_ppc.h> //printf
+#include <string.h> //memset
 
 /**
  * Initialize USB stack.
