@@ -2,7 +2,7 @@ AR = $(PREFIX)ar
 AS = $(PREFIX)as
 CC = $(PREFIX)gcc
 CXX = $(PREFIX)g++
-LD = $(PREFIX)ld
+LD = $(PREFIX)gcc
 OBJCOPY = $(PREFIX)objcopy
 RANLIB = $(PREFIX)ranlib
 STRIP = $(PREFIX)strip
@@ -23,7 +23,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "  LINK      $@"
-	@$(CC) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
 
 ifneq ($(LDSCRIPT),)
 $(TARGET): $(LDSCRIPT)

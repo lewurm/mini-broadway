@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "utils.h"
 #include "start.h"
 #include "hollywood.h"
-#include "string.h"
+#include "../string.h"
 #include "elf.h"
 
 typedef struct {

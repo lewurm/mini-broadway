@@ -9,4 +9,3 @@ CFLAGS += -fomit-frame-pointer -ffunction-sections
 CFLAGS += -Wall -Wextra -Os -pipe
 ASFLAGS =
 LDFLAGS = -mbig-endian -n -nostartfiles -nodefaultlibs -Wl,-gc-sections
-

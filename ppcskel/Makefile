@@ -1,4 +1,4 @@
-include broadway.mk
+include ../common/broadway.mk
 
 DEFINES = -DLACKS_SYS_TYPES_H -DLACKS_ERRNO_H -DLACKS_STDLIB_H -DLACKS_STRING_H -DLACKS_STRINGS_H -DLACKS_UNISTD_H -DCAN_HAZ_IRQ
 LDSCRIPT = mini.ld
@@ -13,7 +13,7 @@ OBJS = realmode.o crt0.o main.o string.o sync.o time.o printf.o input.o \
 
 include usb/Makefile
 
-include common.mk
+include ../common/common.mk
 
 upload: $(TARGET)
 	@$(WIIDEV)/bin/bootmii -p $<

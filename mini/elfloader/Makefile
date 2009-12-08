@@ -1,4 +1,4 @@
-include ../starlet.mk
+include ../../common/starlet.mk
 
 CFLAGS += -fpic
 LDSCRIPT = stub.ld
@@ -6,9 +6,9 @@ LIBS = -lgcc
 
 TARGET = elfloader.elf
 TARGET_BIN = elfloader.bin
-OBJS = start.o stub.o string.o utils.o
+OBJS = start.o stub.o ../string.o utils.o
 
-include ../common.mk
+include ../../common/common.mk
 
 all: $(TARGET_BIN)
 
