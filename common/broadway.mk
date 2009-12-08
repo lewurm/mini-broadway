@@ -10,3 +10,6 @@ CFLAGS += -Wall -Wextra -Os -pipe
 ASFLAGS =
 LDFLAGS = -mcpu=750 -m32 -n -nostartfiles -nodefaultlibs -Wl,-gc-sections
 
+ifeq ($(MAKING_LIBBROADWAY),)
+LDFLAGS += $(WIIDEV)/powerpc-elf/lib/realmode.o
+endif
