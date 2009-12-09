@@ -125,9 +125,8 @@ int main(void)
 	gfx_printf("Success. Initing IRQs...\n");
 	gfx_printf(" and starting core...\n");
 	usleep(10000);
-	irq_hw_enable(IRQ_TIMER);
 	/* external ohci */
-	irq_hw_enable(IRQ_OHCI0);
+//	irq_hw_enable(IRQ_OHCI0);
 	/* internal ohci */
 	//irq_hw_enable(IRQ_OHCI1);
 	

@@ -109,27 +109,21 @@ int _irq_bw_pi_handler_reset(u32 irq)
 	(void)irq;
 	return 1;
 }
-int gfx_printf(const char *fmt, ...);
+
 int _irq_bw_pi_handler_hardware(u32 irq)
 {
 	int i;
 	u32 enabled = read32(HW_PPCIRQMASK);
 	u32 flags = read32(HW_PPCIRQFLAG);
 	
-	gfx_printf("In HW IRQ handler: 0x%08x 0x%08x 0x%08x\n", enabled, flags, flags & enabled);
-	
-	flags &= enabled;
+//	flags &= enabled;
 	
 	for(i = 0; i < IRQ_MAX; i++) {
 		if(flags & IRQF(i)) { 
 			if(irq_get_handler(i)) {
-				gfx_printf("handling irq#%d", i);
-				if((irq_get_handler(i))(i)) {
-					write32(HW_PPCIRQFLAG, IRQF(i));
-				}
-			}else{
-				write32(HW_PPCIRQFLAG, IRQF(i));
+				(irq_get_handler(i))(i);
 			}
+			write32(HW_PPCIRQFLAG, IRQF(i));
 		}
 	}
 	
@@ -207,33 +201,28 @@ void irq_handler(void)
 	u32 enabled = read32(BW_PI_IRQMASK);
 	u32 flags = read32(BW_PI_IRQFLAG);
 
-	gfx_printf("In IRQ handler: 0x%08x 0x%08x 0x%08x\n", enabled, flags, flags & enabled);
-
-	flags &= enabled;
+//	flags &= enabled;
 
 	for(i = 0; i < BW_PI_IRQ_MAX; i++) {
 		if(flags & IRQF(i)) { 
 			if(irq_bw_pi_get_handler(i)) {
-				gfx_printf("handling irq#%d", i);
-				if((irq_bw_pi_get_handler(i))(i)) {
-					write32(BW_PI_IRQFLAG, IRQF(i));
-				}
-			}else{
-				write32(BW_PI_IRQFLAG, IRQF(i));
+				(irq_bw_pi_get_handler(i))(i);
 			}
+			write32(BW_PI_IRQFLAG, IRQF(i));
 		}
 	}
-
 }
 
 void irq_bw_enable(u32 irq)
 {
 	set32(BW_PI_IRQMASK, IRQF(irq));
+	write32(BW_PI_IRQFLAG, IRQF(irq));
 	bw_enabled_irq |= IRQF(irq);
 }
 
 void irq_bw_disable(u32 irq)
 {
+	write32(BW_PI_IRQFLAG, IRQF(irq));
 	clear32(BW_PI_IRQMASK, IRQF(irq));
 	bw_enabled_irq &= ~IRQF(irq);
 }
@@ -241,11 +230,13 @@ void irq_bw_disable(u32 irq)
 void irq_hw_enable(u32 irq)
 {
 	set32(HW_PPCIRQMASK, IRQF(irq));
+	write32(HW_PPCIRQFLAG, IRQF(irq));
 	hw_enabled_irq |= IRQF(irq);
 }
 
 void irq_hw_disable(u32 irq)
 {
+	write32(HW_PPCIRQFLAG, IRQF(irq));
 	clear32(HW_PPCIRQMASK, IRQF(irq));
 	hw_enabled_irq &= ~IRQF(irq);
 }
@@ -253,28 +244,34 @@ void irq_hw_disable(u32 irq)
 void irq_enable()
 {
 	register u32 _val = 0;
-	__asm__("mfmsr	%0			\n" \
+	asm volatile(\
+		"mfmsr	%0			\n" \
 		"ori	%0, %0, 0x8000		\n" \
 		"mtmsr	%0			\n" \
 		: "=&r"((_val)) \
 		:   "0"((_val)));
 	ppcsync();
-	__asm__("mfmsr %0" : "=r"(msrvalue) : );
+	asm volatile("mfmsr %0" : "=r"(msrvalue) : );
+	write32(BW_PI_IRQFLAG, 0xFFFFFFFF);
+	write32(HW_PPCIRQFLAG, 0xFFFFFFFF);
 	irqs_on = 1;
 }	
 
 u32 irq_disable()
 {
 	u32 was_on = 0;
-	register u32 _disable_mask = 0; \
-	__asm__("mfmsr	%0			\n" \
+	register u32 _disable_mask = 0;
+	write32(BW_PI_IRQFLAG, 0xFFFFFFFF);
+	write32(HW_PPCIRQFLAG, 0xFFFFFFFF);
+	asm volatile(\
+		"mfmsr	%0			\n" \
 		"rlwinm	%1, %0, 0, 17, 15	\n" \
 		"mtmsr	%1			\n" \
 		"extrwi	%0, %0, 1, 16		\n" \
 		: "=&r" ((was_on)), "=&r" ((_disable_mask)) \
 		: "0" ((was_on)), "1" ((_disable_mask)));
 	ppcsync();
-	__asm__("mfmsr %0" : "=r"(msrvalue) : );
+	asm volatile("mfmsr %0" : "=r"(msrvalue) : );
 	irqs_on = 0;
 	return was_on;
 }
