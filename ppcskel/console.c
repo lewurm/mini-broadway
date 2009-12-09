@@ -35,7 +35,7 @@ typedef struct {
 #define CONSOLE_CHAR_HEIGHT 16
 #define CONSOLE_ROW_HEIGHT (CONSOLE_CHAR_HEIGHT + 1) 
 
-static u32 *xfb = NULL;
+u32 *xfb = NULL;
 static int y_add = 0;
 
 u32 *font_yuv[255];

@@ -19,9 +19,12 @@ endif
 
 DEPDIR = .deps
 
+ifeq ($(MAKING_LIBBROADWAY),)
 CFLAGS	+= -I$(WIIDEV)/include
-CFLAGS	+= $(INCLUDES)
 LDFLAGS	+= -L$(WIIDEV)/lib
+endif
+
+CFLAGS	+= $(INCLUDES)
 
 all: $(TARGET)
 

@@ -10,6 +10,11 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 
 #include <broadway.h>
 
+void ppcsync()
+{
+	asm("sync ; isync");
+}
+
 void sync_before_read(void *p, u32 len)
 {
 	u32 a, b;
@@ -18,7 +23,7 @@ void sync_before_read(void *p, u32 len)
 	for(; a < b; a += 32)
 		asm("dcbi 0,%0" : : "b"(a));
 
-	asm("sync ; isync");
+	ppcsync();
 }
 
 void sync_after_write(const void *p, u32 len)
@@ -29,7 +34,7 @@ void sync_after_write(const void *p, u32 len)
 	for(; a < b; a += 32)
 		asm("dcbst 0,%0" : : "b"(a));
 
-	asm("sync ; isync");
+	ppcsync();
 }
 
 void sync_before_exec(const void *p, u32 len)
@@ -40,6 +45,5 @@ void sync_before_exec(const void *p, u32 len)
 	for(; a < b; a += 32)
 		asm("dcbst 0,%0 ; sync ; icbi 0,%0" : : "b"(a));
 
-	asm("sync ; isync");
+	ppcsync();
 }
-

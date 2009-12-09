@@ -18,11 +18,12 @@ extern char exception_2200_start, exception_2200_end;
 void exception_handler(int exception)
 {
 	u32 was_on = irq_disable();
+	gfx_printf("Exception handler...");
 	/* Check if the exception was actually an external interrupt */
 	if(exception == 0x500)
 		irq_handler();
 	else if(exception == 0x900)	/* check if exception happened due to the decrementer */
-		/* printf("\nDecrementer exception occured - who cares?\n")*/;
+		gfx_printf("\nDecrementer exception occured - who cares?\n");
 	else {
 		u32 *x;
 		u32 i;

@@ -15,7 +15,6 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 
 #include <types.h>
 
-#ifdef CAN_HAZ_IRQ
 #define IRQ_TIMER	0
 #define IRQ_NAND	1
 #define IRQ_AES		2
@@ -100,9 +99,7 @@ static inline void irq_wait(void)
 }
 */
 
-#endif
-
-#else
+/*#else
 // stub functions allow us to avoid sprinkling other code with ifdefs
 static inline u32 irq_disable(void) {
 	return 0;
@@ -110,7 +107,7 @@ static inline u32 irq_disable(void) {
 
 static inline void irq_restore(u32 was_on) {
 	(void)was_on;
-}
+}*/
 #endif
 
 

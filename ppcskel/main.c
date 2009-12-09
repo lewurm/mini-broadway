@@ -20,17 +20,22 @@ Copyright (C) 2009              John Kelley <wiidev@kelley.ca>
 #include <diskmii/nandfs.h>
 #include <diskmii.h>
 #include <diskmii/diskio.h>
+#include <hextwelve.h>
+#include <hextwelve/core/core.h>
+#include <hextwelve/drivers/class/hid.h>
 #include "video_low.h"
 #include "input.h"
 #include "console.h"
-#include "usb/core/core.h"
-#include "usb/drivers/class/hid.h"
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
+char spinchrs[5] = "|/-\\";
 otp_t otp;
 seeprom_t seeprom;
-
+extern u32 irqs_on;
+extern u32 bw_enabled_irq;
+extern u32 hw_enabled_irq;
+extern u32 msrvalue;
 static void dsp_reset(void)
 {
 	write16(0x0c00500a, read16(0x0c00500a) & ~0x01f8);
@@ -86,11 +91,7 @@ int main(void)
 	irq_initialize();
 	irq_bw_enable(BW_PI_IRQ_RESET);
 	irq_bw_enable(BW_PI_IRQ_HW); //hollywood pic
-	/* external ohci */
-	irq_hw_enable(IRQ_OHCI0);
-	/* internal ohci */
-	//irq_hw_enable(IRQ_OHCI1);
-
+	
 	ipc_initialize();
 	ipc_slowping();
 
@@ -111,10 +112,25 @@ int main(void)
 		printf("Sorry, this version of MINI (armboot.bin)\n"
 			"is too old, please update to at least %d.%0d.\n", 
 			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
-		for (;;) 
-			; // better ideas welcome!
+		return 1;	/* Here's a better idea: return. */
+				/* The crt0 just infinite loops for us upon return. */
 	}
-
+	gfx_printf("\n\n");
+	gfx_printf("Initing hextwelve!\n");
+	usleep(10000);
+	if(!hextwelve_init()) {
+		gfx_printf("Unable to init hextwelve! bailing!\n");
+		return 1;
+	}
+	gfx_printf("Success. Initing IRQs...\n");
+	gfx_printf(" and starting core...\n");
+	usleep(10000);
+	irq_hw_enable(IRQ_TIMER);
+	/* external ohci */
+	irq_hw_enable(IRQ_OHCI0);
+	/* internal ohci */
+	//irq_hw_enable(IRQ_OHCI1);
+	
 	/* external ohci */
 	usb_init(OHCI0_REG_BASE);
 
@@ -124,14 +140,24 @@ int main(void)
 	/* load HID keyboard driver */
 	usb_hidkb_init();
 
+	u32 old_irqs_on = !irqs_on;
+	gfx_printf("IRQs on: %d\n", irqs_on);
+	gfx_printf("BW IRQs: %08X\n", bw_enabled_irq);
+	gfx_printf("HW IRQs: %08X\n", hw_enabled_irq);
+	gfx_printf("MSR Val: %08X\n", msrvalue);
+	old_irqs_on = irqs_on;
 wait_kb:
 	/* wait for usb keyboard plugged in */
 	if(!usb_hidkb_inuse()) {
-		print_str("plug in an usb keyboard", 23);
+		gfx_printf("plug in a usb keyboard");
 	}
-	while(!usb_hidkb_inuse());
+	while(!usb_hidkb_inuse()) {
+		if(irqs_on != old_irqs_on)
+			gfx_printf("IRQs on: %d\n", irqs_on);
+		old_irqs_on = irqs_on;
+	}
 
-	print_str("hello keyboard :)", 17);
+	gfx_printf("hello keyboard :)");
 
 #define FONT_WIDTH  13
 #define FONT_HEIGHT 15
@@ -218,12 +244,11 @@ wait_kb:
 
 	goto wait_kb;
 
-#if 0
-	printf("===============================\n");
+	gfx_printf("===============================\n");
 
-	printf("bye, world!\n");
-#endif
+	gfx_printf("bye, world!\n");
 
+	hextwelve_quit();
 	return 0;
 }
 

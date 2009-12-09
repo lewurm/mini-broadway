@@ -15,6 +15,11 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 static irq_handler_t*	irq_handler_table[IRQ_MAX];
 static irq_handler_t*	irq_bw_pi_handler_table[BW_PI_IRQ_MAX];
 
+int irqs_on = 0;
+u32 bw_enabled_irq = 0;
+u32 hw_enabled_irq = 0;
+u32 msrvalue = 0;
+
 int irq_register_handler(u32 irqn, irq_handler_t* irqh)
 {
 	irq_handler_table[irqn] = irqh;
@@ -98,37 +103,27 @@ int _irq_handler_sdhc(u32 irq)
 	return 1;
 }
 
-/*
-if (hw_flags & IRQF_OHCI0) {
-	hcdi_irq(OHCI0_REG_BASE);
-	write32(HW_PPCIRQFLAG, IRQF_OHCI0);
-}
-if (hw_flags & IRQF_OHCI1) {
-	hcdi_irq(OHCI1_REG_BASE);
-	write32(HW_PPCIRQFLAG, IRQF_OHCI1);
-}
-*/
-
 int _irq_bw_pi_handler_reset(u32 irq)
 {
 	boot2_run(1, 2); /* Launch sysmenu */
 	(void)irq;
 	return 1;
 }
-
+int gfx_printf(const char *fmt, ...);
 int _irq_bw_pi_handler_hardware(u32 irq)
 {
 	int i;
 	u32 enabled = read32(HW_PPCIRQMASK);
 	u32 flags = read32(HW_PPCIRQFLAG);
 	
-	/* printf("In IRQ handler: 0x%08x 0x%08x 0x%08x\n", hw_enabled, hw_flags, hw_flags & hw_enabled); */
+	gfx_printf("In HW IRQ handler: 0x%08x 0x%08x 0x%08x\n", enabled, flags, flags & enabled);
 	
 	flags &= enabled;
 	
 	for(i = 0; i < IRQ_MAX; i++) {
 		if(flags & IRQF(i)) { 
 			if(irq_get_handler(i)) {
+				gfx_printf("handling irq#%d", i);
 				if((irq_get_handler(i))(i)) {
 					write32(HW_PPCIRQFLAG, IRQF(i));
 				}
@@ -212,11 +207,14 @@ void irq_handler(void)
 	u32 enabled = read32(BW_PI_IRQMASK);
 	u32 flags = read32(BW_PI_IRQFLAG);
 
+	gfx_printf("In IRQ handler: 0x%08x 0x%08x 0x%08x\n", enabled, flags, flags & enabled);
+
 	flags &= enabled;
 
 	for(i = 0; i < BW_PI_IRQ_MAX; i++) {
 		if(flags & IRQF(i)) { 
 			if(irq_bw_pi_get_handler(i)) {
+				gfx_printf("handling irq#%d", i);
 				if((irq_bw_pi_get_handler(i))(i)) {
 					write32(BW_PI_IRQFLAG, IRQF(i));
 				}
@@ -231,21 +229,25 @@ void irq_handler(void)
 void irq_bw_enable(u32 irq)
 {
 	set32(BW_PI_IRQMASK, IRQF(irq));
+	bw_enabled_irq |= IRQF(irq);
 }
 
 void irq_bw_disable(u32 irq)
 {
 	clear32(BW_PI_IRQMASK, IRQF(irq));
+	bw_enabled_irq &= ~IRQF(irq);
 }
 
 void irq_hw_enable(u32 irq)
 {
 	set32(HW_PPCIRQMASK, IRQF(irq));
+	hw_enabled_irq |= IRQF(irq);
 }
 
 void irq_hw_disable(u32 irq)
 {
 	clear32(HW_PPCIRQMASK, IRQF(irq));
+	hw_enabled_irq &= ~IRQF(irq);
 }
 
 void irq_enable()
@@ -256,6 +258,9 @@ void irq_enable()
 		"mtmsr	%0			\n" \
 		: "=&r"((_val)) \
 		:   "0"((_val)));
+	ppcsync();
+	__asm__("mfmsr %0" : "=r"(msrvalue) : );
+	irqs_on = 1;
 }	
 
 u32 irq_disable()
@@ -268,12 +273,17 @@ u32 irq_disable()
 		"extrwi	%0, %0, 1, 16		\n" \
 		: "=&r" ((was_on)), "=&r" ((_disable_mask)) \
 		: "0" ((was_on)), "1" ((_disable_mask)));
+	ppcsync();
+	__asm__("mfmsr %0" : "=r"(msrvalue) : );
+	irqs_on = 0;
 	return was_on;
 }
 
 void irq_restore(u32 was_on)
 {
+	irqs_on = 2;
 	if(was_on)
 		irq_enable();
+	irq_enable();		/* Looks like we need to do this hack... >.> */
 }
 

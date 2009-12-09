@@ -11,7 +11,7 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 #ifndef _STRING_H
 #define _STRING_H
 
-#include "types.h"
+#include <types.h>
 
 size_t	strlen	(const char *				);
 size_t	strnlen	(const char *,	size_t			);
