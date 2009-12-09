@@ -10,31 +10,8 @@ Copyright (C) 2009		Andre Heider "dhewg" <dhewg@wiibrew.org>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
-#include "printf.h"
-
-#define		EXI_REG_BASE			0xd806800
-#define		EXI0_REG_BASE			(EXI_REG_BASE+0x000)
-#define		EXI1_REG_BASE			(EXI_REG_BASE+0x014)
-#define		EXI2_REG_BASE			(EXI_REG_BASE+0x028)
-
-#define		EXI0_CSR				(EXI0_REG_BASE+0x000)
-#define		EXI0_MAR				(EXI0_REG_BASE+0x004)
-#define		EXI0_LENGTH				(EXI0_REG_BASE+0x008)
-#define		EXI0_CR					(EXI0_REG_BASE+0x00c)
-#define		EXI0_DATA				(EXI0_REG_BASE+0x010)
-
-#define		EXI1_CSR				(EXI1_REG_BASE+0x000)
-#define		EXI1_MAR				(EXI1_REG_BASE+0x004)
-#define		EXI1_LENGTH				(EXI1_REG_BASE+0x008)
-#define		EXI1_CR					(EXI1_REG_BASE+0x00c)
-#define		EXI1_DATA				(EXI1_REG_BASE+0x010)
-
-#define		EXI2_CSR				(EXI2_REG_BASE+0x000)
-#define		EXI2_MAR				(EXI2_REG_BASE+0x004)
-#define		EXI2_LENGTH				(EXI2_REG_BASE+0x008)
-#define		EXI2_CR					(EXI2_REG_BASE+0x00c)
-#define		EXI2_DATA				(EXI2_REG_BASE+0x010)
+#include <broadway.h>
+#include <printf.h>
 
 static int gecko_console_enabled = 0;
 

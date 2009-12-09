@@ -10,11 +10,7 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "irq.h"
-#include "hollywood.h"
-#include "ipc.h"
-#include "bootmii_ppc.h"
-#include "mini_ipc.h"
+#include <broadway.h>
 
 static irq_handler_t*	irq_handler_table[IRQ_MAX];
 static irq_handler_t*	irq_bw_pi_handler_table[BW_PI_IRQ_MAX];

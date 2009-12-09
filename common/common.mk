@@ -20,13 +20,14 @@ endif
 DEPDIR = .deps
 
 CFLAGS	+= -I$(WIIDEV)/include
+CFLAGS	+= $(INCLUDES)
 LDFLAGS	+= -L$(WIIDEV)/lib
 
 all: $(TARGET)
 
 %.elf: $(OBJS) $(NOLINKOBJS)
 	@echo "  LINK      $@"
-	$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
+	@$(LD) $(LDFLAGS) $(OBJS) $(LIBS) -o $@
 
 %.a: $(OBJS) $(NOLINKOBJS)
 	@echo "  ARCHIVE   $@"
@@ -62,6 +63,4 @@ define bin2o
 endef
 
 -include $(DEPDIR)/*
-
-.PHONY: clean
 

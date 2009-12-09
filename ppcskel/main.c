@@ -12,23 +12,19 @@ Copyright (C) 2009              John Kelley <wiidev@kelley.ca>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include <broadway/bootmii_ppc.h>
+#include <broadway.h>
 #include <string.h>
-#include <broadway/ipc.h>
-#include <broadway/mini_ipc.h>
-#include "nandfs.h"
-#include "fat.h"
 #include <malloc.h>
-#include "diskio.h"
 #include <printf.h>
+#include <sha1.h>
+#include <diskmii/nandfs.h>
+#include <diskmii.h>
+#include <diskmii/diskio.h>
 #include "video_low.h"
 #include "input.h"
 #include "console.h"
-#include <broadway/irq.h>
 #include "usb/core/core.h"
 #include "usb/drivers/class/hid.h"
-#include "sha1.h"
-#include <broadway/hollywood.h>
 
 #define MINIMUM_MINI_VERSION 0x00010001
 
@@ -43,27 +39,27 @@ static void dsp_reset(void)
 }
 
 static char ascii(char s) {
-  if(s < 0x20) return '.';
-  if(s > 0x7E) return '.';
-  return s;
+	if(s < 0x20) return '.';
+	if(s > 0x7E) return '.';
+	return s;
 }
 
 void hexdump(void *d, int len) {
-  u8 *data;
-  int i, off;
-  data = (u8*)d;
-  for (off=0; off<len; off += 16) {
-    printf("%08x  ",off);
-    for(i=0; i<16; i++)
-      if((i+off)>=len) printf("   ");
-      else printf("%02x ",data[off+i]);
+	u8 *data;
+	int i, off;
+	data = (u8*)d;
+	for (off=0; off<len; off += 16) {
+		printf("%08x  ",off);
+		for(i=0; i<16; i++)
+			if((i+off)>=len) printf("   ");
+			else printf("%02x ",data[off+i]);
 
-    printf(" ");
-    for(i=0; i<16; i++)
-      if((i+off)>=len) printf(" ");
-      else printf("%c",ascii(data[off+i]));
-    printf("\n");
-  }
+		printf(" ");
+		for(i=0; i<16; i++)
+			if((i+off)>=len) printf(" ");
+			else printf("%c",ascii(data[off+i]));
+		printf("\n");
+	}
 }
 	
 void testOTP(void)
@@ -99,7 +95,7 @@ int main(void)
 	ipc_slowping();
 
 	gecko_init();
-    input_init();
+	input_init();
 	init_fb(vmode);
 
 	VIDEO_Init(vmode);
@@ -224,8 +220,6 @@ wait_kb:
 
 #if 0
 	printf("===============================\n");
-
-	SHA1TestCases();
 
 	printf("bye, world!\n");
 #endif

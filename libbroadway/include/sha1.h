@@ -3,6 +3,4 @@
 
 void SHA1(unsigned char *ptr, unsigned int size, unsigned char *outbuf);
 
-void SHA1TestCases(void);
-
 #endif

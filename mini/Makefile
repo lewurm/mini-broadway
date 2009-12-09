@@ -1,4 +1,8 @@
-include ../common/starlet.mk
+ifeq ($(strip $(WIIDEV)),)
+$(error "Set WIIDEV in your environment.")
+endif
+
+include $(WIIDEV)/starlet.mk
 
 ASFLAGS += -D_LANGUAGE_ASSEMBLY
 CFLAGS += -DCAN_HAZ_IRQ -DCAN_HAZ_IPC
@@ -15,7 +19,7 @@ OBJS = start.o main.o ipc.o vsprintf.o string.o gecko.o memory.o memory_asm.o \
 	irq.o irq_asm.o exception.o exception_asm.o seeprom.o crypto.o nand.o \
 	boot2.o ldhack.o sdmmc.o
 
-include ../common/common.mk
+include $(WIIDEV)/common.mk
 
 all: $(TARGET_BIN)
 

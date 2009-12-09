@@ -2,9 +2,7 @@
 	BootMii - a Free Software replacement for the Nintendo/BroadOn bootloader.
 	Requires mini.
 
-Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
-Copyright (C) 2009		Bernhard Urban <lewurm@gmx.net>
-Copyright (C) 2009		Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
+ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -49,13 +47,13 @@ void exception_handler(int exception)
 	irq_restore(was_on);
 }
 
-void exception_init(void)
+void exception_init()
 {
 	u32 vector;
 	u32 len_2200;
 
 	for(vector = 0x100; vector < 0x2000; vector += 0x10) {
-		u32 *insn = (u32 *)(0x80000000 + vector);
+		u32 *insn = (u32 *)(phys_to_virt(vector));
 		insn[0] = 0xBC002000;			// stmw	0, 0x2000(0)
 		insn[1] = 0x38600000 | (u32)vector;	// li	3, vector
 		insn[2] = 0x48002202;			// ba	0x2200

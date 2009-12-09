@@ -13,7 +13,7 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 #ifndef __IRQ_H__
 #define __IRQ_H__
 
-#include "types.h"
+#include <types.h>
 
 #ifdef CAN_HAZ_IRQ
 #define IRQ_TIMER	0

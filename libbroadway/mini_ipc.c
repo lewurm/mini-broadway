@@ -11,10 +11,8 @@ Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
-#include "ipc.h"
-#include "mini_ipc.h"
-#include "string.h"
+#include <broadway.h>
+#include <string.h>
 
 int ipc_powerpc_boot(const void *addr, u32 len)
 {
@@ -47,8 +45,7 @@ void getotp(otp_t *otp)
 
 void getMiniGitVer(char *buf, u16 len)
 {
-	if (len < 32)
-	{
+	if(len < 32) {
 		memset((void *)buf, 0, 32);
 		return;
 	}

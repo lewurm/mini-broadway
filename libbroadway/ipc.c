@@ -10,9 +10,8 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include "bootmii_ppc.h"
-#include "ipc.h"
-#include "string.h"
+#include <broadway.h>
+#include <string.h>
 #include <stdarg.h>
 
 static volatile ipc_request *in_queue;
@@ -39,8 +38,6 @@ typedef const struct {
 static ipc_infohdr *infohdr;
 
 static u32 cur_tag;
-
-#define		HW_REG_BASE			0xd000000
 
 #define		HW_IPC_PPCMSG		(HW_REG_BASE + 0x000) //PPC to ARM
 #define		HW_IPC_PPCCTRL		(HW_REG_BASE + 0x004)

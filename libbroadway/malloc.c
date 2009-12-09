@@ -445,17 +445,20 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #define MALLOC_FAILURE_ACTION /**/
 #define DEBUG 1
 
-#include "bootmii_ppc.h"
-#include "string.h"
+#include <broadway.h>
+#include <string.h>
 
 extern unsigned int _sbrk_start, _sbrk_end;
 
 void *sbrk(int incr) {
 	static unsigned int limit = 0;
 //	printf ("sbrk(%d) limit=%x\n", incr, limit);
-	if (limit == 0) limit = (unsigned int) &_sbrk_start;
-	if (incr < 0) return 0;
-	if ((limit + incr) > (unsigned int) &_sbrk_end) return 0;
+	if(limit == 0)
+		limit = (unsigned int)&_sbrk_start;
+	if(incr < 0)
+		return 0;
+	if((limit + incr) > (unsigned int)&_sbrk_end)
+		return 0;
 	void *retval = (void*)limit;
 	limit += incr;
 //	printf("Returning %p\n", retval);

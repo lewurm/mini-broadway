@@ -11,8 +11,8 @@ Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 #ifndef __PPC_H__
 #define __PPC_H__
 
-#include "types.h"
-#include "printf.h"
+#include <types.h>
+#include <printf.h>
 
 #define OK 0
 #define EFAIL 1
@@ -91,7 +91,8 @@ void sync_before_exec(const void *p, u32 len);
 /* Time. */
 void udelay(u32 us);
 u64 getticks();
-#define mftb()	getticks()
+#define usleep(n)	udelay(n)
+#define mftb()		getticks()
 
 /* Special purpose registers. */
 #define mtspr(n, x) asm("mtspr %1,%0" : : "r"(x), "i"(n))
