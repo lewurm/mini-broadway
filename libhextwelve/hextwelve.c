@@ -20,17 +20,15 @@ int _irq_handler_ohci(u32 irq)
 {
 	u32 base;
 	switch(irq) {
+		default: /* Uhh... */
 		case IRQ_OHCI0:
 			base = OHCI0_REG_BASE;
 			break;
 		case IRQ_OHCI1:
 			base = OHCI1_REG_BASE;
 			break;
-		default: /* Uhh... */
-			return 1;
 	}
 	hcdi_irq(base);
-	(void)irq;
 	return 1;
 }
 

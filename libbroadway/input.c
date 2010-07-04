@@ -44,8 +44,7 @@ static void gpio_init(void)
 {
 	// setup power and eject button hollywood IRQ for PPC
 	mask32(HW_GPIO1OWNER,           0, 0x41); // set GPIO owner to PPC
-	mask32(HW_ARMIRQMASK, IRQF_GPIO1B, 0);
-	mask32(HW_PPCIRQMASK,           0, IRQF_GPIO1B);
+	irq_hw_enable(IRQ_GPIO1B);
 	mask32(HW_GPIO1BINTENABLE,      0, 0x41);
 	mask32(HW_GPIO1BINTLVL,         0, 0x41);
 }

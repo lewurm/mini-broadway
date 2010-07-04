@@ -28,15 +28,14 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #include <input.h>
 #include <console.h>
 
-#define MINIMUM_MINI_VERSION 0x00010002
+#define DELAY_TIME		(500000)
+#define IRQ_STABLE_TIME		(1000000)
+
+#define MINIMUM_MINI_VERSION	(0x00010002)
 
 char spinchrs[5] = "|/-\\";
 otp_t otp;
 seeprom_t seeprom;
-extern u32 irqs_on;
-extern u32 bw_enabled_irq;
-extern u32 hw_enabled_irq;
-extern u32 msrvalue;
 
 static void dsp_reset(void)
 {
@@ -51,7 +50,8 @@ static char ascii(char s)
 	return s;
 }
 
-void hexdump(void *d, int len) {
+void hexdump(void *d, int len)
+{
 	u8 *data;
 	int i, off;
 	data = (u8*)d;
@@ -87,13 +87,12 @@ void testOTP(void)
 int main(void)
 {
 	u16 ret;
+	u32 was_on;
 	int vmode = -1;
 	exception_init();
 	dsp_reset();
 
 	irq_initialize();
-	irq_bw_enable(BW_PI_IRQ_RESET);
-	irq_bw_enable(BW_PI_IRQ_HW); //hollywood pic
 	
 	ipc_initialize();
 	ipc_slowping();
@@ -107,6 +106,8 @@ int main(void)
 	VISetupEncoder();
 
 	gfx_printf("\n\n");
+	gfx_printf("Booting!\n");
+	usleep(DELAY_TIME);
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
@@ -122,44 +123,55 @@ int main(void)
 		return 1;
 	}
 	
+	gfx_printf("Turning on Hardware Broadway IRQ!\n");
+	usleep(DELAY_TIME);
+	irq_bw_enable(BW_PI_IRQ_HW);
+	gfx_printf("Switching on some IRQs!\n");
+	usleep(DELAY_TIME);
+	irq_hw_enable(IRQ_PPCIPC);
+	irq_hw_enable(IRQ_RESET);
 	gfx_printf("Initing hextwelve!\n");
-	usleep(10000);
+	usleep(DELAY_TIME);
 	if((ret = hextwelve_init())) {
 		gfx_printf("Unable to init hextwelve %d! bailing!\n", ret);
 		return 1;
 	}
-	gfx_printf("Success. Initing IRQs...\n");
-	gfx_printf(" and starting core...\n");
-	usleep(10000);
+	gfx_printf("Success.\n");
+	gfx_printf("Initing hextwelve IRQs...\n");
+	usleep(DELAY_TIME);
 	/* external ohci */
 	irq_hw_enable(IRQ_OHCI0);
 	/* internal ohci */
 	//irq_hw_enable(IRQ_OHCI1);
 	
+	gfx_printf("Initing hextwelve USB driver...\n");
+	usleep(DELAY_TIME);
 	/* external ohci */
 	usb_init(OHCI0_REG_BASE);
 
 	/* internal ohci */
 	//usb_init(OHCI1_REG_BASE);
 
+	gfx_printf("Loading hextwelve HID Keyboard driver...\n");
+	usleep(DELAY_TIME);
 	/* load HID keyboard driver */
 	usb_hidkb_init();
 
-	u32 old_irqs_on = !irqs_on;
-	gfx_printf("IRQs on: %d\n", irqs_on);
-	gfx_printf("BW IRQs: %08X\n", bw_enabled_irq);
-	gfx_printf("HW IRQs: %08X\n", hw_enabled_irq);
-	gfx_printf("MSR Val: %08X\n", msrvalue);
-	old_irqs_on = irqs_on;
+	gfx_printf("Waiting for IRQs to stabilize...\n");
+	usleep(IRQ_STABLE_TIME);
 wait_kb:
 	/* wait for usb keyboard plugged in */
 	if(!usb_hidkb_inuse()) {
 		gfx_printf("plug in a usb keyboard");
 	}
 	while(!usb_hidkb_inuse()) {
-		if(irqs_on != old_irqs_on)
-			gfx_printf("IRQs on: %d\n", irqs_on);
-		old_irqs_on = irqs_on;
+		if(reset_pressed) {
+			gfx_printf("Reset hit...\n");
+			usleep(DELAY_TIME * 20);
+			gfx_printf("Load Sysmenu...\n");
+			boot2_run(1,2);
+			return 1;
+		}
 	}
 
 	gfx_printf("hello keyboard :)");

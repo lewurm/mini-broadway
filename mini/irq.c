@@ -4,7 +4,7 @@
 
 Copyright (C) 2008, 2009	Hector Martin "marcan" <marcan@marcansoft.com>
 Copyright (C) 2008, 2009	Sven Peter <svenpeter@gmail.com>
-Copyright (C) 2009			Andre Heider "dhewg" <dhewg@wiibrew.org>
+Copyright (C) 2009		Andre Heider "dhewg" <dhewg@wiibrew.org>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -27,7 +27,7 @@ void irq_initialize(void)
 {
 	irq_setup_stack();
 	write32(HW_ARMIRQMASK, 0);
-	write32(HW_ARMIRQFLAG, 0xffffffff);
+	write32(HW_ARMIRQFLAG, 0xFFFFFFFF);
 	irq_restore(CPSR_FIQDIS);
 
 	//???
@@ -40,7 +40,7 @@ void irq_initialize(void)
 void irq_shutdown(void)
 {
 	write32(HW_ARMIRQMASK, 0);
-	write32(HW_ARMIRQFLAG, 0xffffffff);
+	write32(HW_ARMIRQFLAG, 0xFFFFFFFF);
 	irq_kill();
 }
 
@@ -51,7 +51,7 @@ void irq_handler(void)
 	
 	//gecko_printf("In IRQ handler: 0x%08x 0x%08x 0x%08x\n", enabled, flags, flags & enabled);
 
-	flags = flags & enabled;
+	flags &= enabled;
 
 	if(flags & IRQF_TIMER) {
 		if (_alarm_frequency) {

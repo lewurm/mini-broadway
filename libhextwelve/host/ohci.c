@@ -233,45 +233,46 @@ void hcdi_fire(u32 reg)
 #ifdef _DU_OHCI_F
 		printf("edhead->headp: 0x%08X\n", LE(edhead->headp));
 #endif
-
 		/* if halted, debug output plz. will break the transfer */
 		if((LE(edhead->headp) & OHCI_ENDPOINT_HALTED)) {
-			n = phys_to_virt(LE(edhead->headp)&~0xf);
-			prev = phys_to_virt((u32)prev);
 #ifdef _DU_OHCI_F_HALT
 			printf("halted!\n");
 #endif
+			if((LE(edhead->headp) & ~0xF) & (prev != 0)) {
+				n = phys_to_virt(LE(edhead->headp)&~0xf);
+				prev = phys_to_virt((u32)prev);
 
-			sync_before_read((void*) n, sizeof(struct general_td));
+				sync_before_read((void*) n, sizeof(struct general_td));
 #ifdef _DU_OHCI_F_HALT
-			printf("n: 0x%08X\n", n);
-			dump_address(n, sizeof(struct general_td), "n(after)");
+				printf("n: 0x%08X\n", n);
+				dump_address(n, sizeof(struct general_td), "n(after)");
 #endif
-			if(n->buflen > 0) {
-				sync_before_read((void*) n->bufaddr, n->buflen);
+				if(n->buflen > 0) {
+					sync_before_read((void*) n->bufaddr, n->buflen);
 #ifdef _DU_OHCI_F_HALT
-				dump_address((void*) n->bufaddr, n->buflen, "n->bufaddr(after)");
+					dump_address((void*) n->bufaddr, n->buflen, "n->bufaddr(after)");
+#endif
+				}
+#ifdef _DU_OHCI_F_HALT
+				dbg_td_flag(LE(n->flags));
+#endif
+
+				sync_before_read((void*) prev, sizeof(struct general_td));
+#ifdef _DU_OHCI_F_HALT
+				printf("prev: 0x%08X\n", prev);
+				dump_address(prev, sizeof(struct general_td), "prev(after)");
+#endif
+				if(prev->buflen >0) {
+					sync_before_read((void*) prev->bufaddr, prev->buflen);
+#ifdef _DU_OHCI_F_HALT
+					dump_address((void*) prev->bufaddr, prev->buflen, "prev->bufaddr(after)");
+#endif
+				}
+#ifdef _DU_OHCI_F_HALT
+				dbg_td_flag(LE(prev->flags));
+				printf("halted end!\n");
 #endif
 			}
-#ifdef _DU_OHCI_F_HALT
-			dbg_td_flag(LE(n->flags));
-#endif
-
-			sync_before_read((void*) prev, sizeof(struct general_td));
-#ifdef _DU_OHCI_F_HALT
-			printf("prev: 0x%08X\n", prev);
-			dump_address(prev, sizeof(struct general_td), "prev(after)");
-#endif
-			if(prev->buflen >0) {
-				sync_before_read((void*) prev->bufaddr, prev->buflen);
-#ifdef _DU_OHCI_F_HALT
-				dump_address((void*) prev->bufaddr, prev->buflen, "prev->bufaddr(after)");
-#endif
-			}
-#ifdef _DU_OHCI_F_HALT
-			dbg_td_flag(LE(prev->flags));
-			printf("halted end!\n");
-#endif
 			goto out;
 		}
 		prev = (struct general_td*) (LE(edhead->headp)&~0xf);

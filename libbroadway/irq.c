@@ -19,27 +19,30 @@ int irqs_on = 0;
 u32 bw_enabled_irq = 0;
 u32 hw_enabled_irq = 0;
 u32 msrvalue = 0;
+u32 fired_irqs;
+u32 fired_bw_pi_irqs;
+u32 reset_pressed = 0;
 
 int irq_register_handler(u32 irqn, irq_handler_t irqh)
 {
-	irq_handler_table[irqn] = irqh;
+	irq_handler_table[irqn % IRQ_MAX] = irqh;
 	return 1;
 }
 
 irq_handler_t irq_get_handler(u32 irqn)
 {
-	return irq_handler_table[irqn];
+	return irq_handler_table[irqn % IRQ_MAX];
 }
 
 int irq_bw_pi_register_handler(u32 irqn, irq_handler_t irqh)
 {
-	irq_bw_pi_handler_table[irqn] = irqh;
+	irq_bw_pi_handler_table[irqn % BW_PI_IRQ_MAX] = irqh;
 	return 1;
 }
 
 irq_handler_t irq_bw_pi_get_handler(u32 irqn)
 {
-	return irq_bw_pi_handler_table[irqn];
+	return irq_bw_pi_handler_table[irqn % BW_PI_IRQ_MAX];
 }
 
 
@@ -78,6 +81,7 @@ int _irq_handler_gpio1(u32 irq)
 
 int _irq_handler_reset(u32 irq)
 {
+	reset_pressed = 1;
 	(void)irq;
 	return 1;
 }
@@ -103,34 +107,32 @@ int _irq_handler_sdhc(u32 irq)
 	return 1;
 }
 
-int _irq_bw_pi_handler_reset(u32 irq)
-{
-	boot2_run(1, 2); /* Launch sysmenu */
-	(void)irq;
-	return 1;
-}
-
 int _irq_bw_pi_handler_hardware(u32 irq)
 {
 	int i;
 	u32 enabled = read32(HW_PPCIRQMASK);
 	u32 flags = read32(HW_PPCIRQFLAG);
+	u32 useflags = flags & enabled;
+	fired_bw_pi_irqs = flags;
 	
-	flags &= enabled;
-	
+	gfx_printf("*BW Fired: %08X  HW Fired: %08X\n", read32(HW_PPCIRQFLAG), read32(BW_PI_IRQFLAG));
+	gfx_printf("*BW Mask:  %08X  HW Mask:  %08X\n", read32(HW_PPCIRQMASK), read32(BW_PI_IRQMASK));
 	for(i = 0; i < IRQ_MAX; i++) {
-		if(flags & IRQF(i)) { 
+		printf("Interrupt check: %d.\n", i);
+		if(useflags & IRQF(i)) { 
+			printf("Did fire!\n");
 			if(irq_get_handler(i)) {
+				printf("We got a handler at 0x%08X\n", irq_get_handler(i));
 				(irq_get_handler(i))(i);
+				useflags &= ~IRQF(i);
 			}
 			write32(HW_PPCIRQFLAG, IRQF(i));
 		}
 	}
 	
-	flags &= ~IRQF_ALL;
-	if(flags) {
-		printf("IRQ: unknown 0x%08x\n", flags);
-		write32(HW_PPCIRQFLAG, flags);
+	if(useflags) {
+		gfx_printf("IRQ: unhandled 0x%08x\n", useflags);
+		write32(HW_PPCIRQFLAG, useflags);
 	}
 	(void)irq;
 	return 1;
@@ -138,7 +140,6 @@ int _irq_bw_pi_handler_hardware(u32 irq)
 
 void _irq_init_defaults()
 {
-	irq_bw_pi_register_handler(BW_PI_IRQ_RESET,	_irq_bw_pi_handler_reset);
 	irq_bw_pi_register_handler(BW_PI_IRQ_HW,	_irq_bw_pi_handler_hardware);
 
 	irq_register_handler(IRQ_TIMER,			_irq_handler_timer);
@@ -156,40 +157,30 @@ void show_frame_no(void);
 void irq_initialize(void)
 {
 	int i;
-	// clear flipper-pic (processor interface)
+	/* Remove all the IRQs from the PPC and clear all current IRQs */
+	write32(HW_PPCIRQMASK, 0);
+	write32(HW_PPCIRQFLAG, IRQF_ALL);
+	u32 hw_enabled_irq = 0;
+	
+	/* Remove all the IRQs and clear all current IRQs */
 	write32(BW_PI_IRQMASK, 0);
 	write32(BW_PI_IRQFLAG, 0xFFFFFFFF);
-
-	// clear hollywood-pic
-	write32(HW_PPCIRQMASK, 0);
-	write32(HW_PPCIRQFLAG, 0xFFFFFFFF);
-
-	/* ??? -- needed?!
-	 * in mini they do
-	 *
-	 * write32(HW_ARMIRQMASK+0x04, 0);
-	 * write32(HW_ARMIRQMASK+0x20, 0);
-	 *
-	 *
-	 * may it's here following; on the other 
-	 * hand it's already done by mini...
-	 *
-	 * write32(HW_PPCIRQMASK+0x04+0x08, 0);
-	 * write32(HW_PPCIRQMASK+0x20+0x08, 0);
-	 */
+	u32 bw_enabled_irq = 0;
 
 	for(i = 0; i < IRQ_MAX; i++) {
 		irq_handler_table[i] = NULL;
 	}
 	for(i = 0; i < BW_PI_IRQ_MAX; i++) {
-		irq_handler_table[i] = NULL;
+		irq_bw_pi_handler_table[i] = NULL;
 	}
+	
 	_irq_init_defaults();
 	irq_enable();
 }
 
 void irq_shutdown(void)
 {
+	/* Remove all the IRQs from the PPC and clear all current IRQs */
 	write32(HW_PPCIRQMASK, 0);
 	write32(HW_PPCIRQFLAG, 0xFFFFFFFF);
 	irq_disable();
@@ -200,16 +191,26 @@ void irq_handler(void)
 	int i;
 	u32 enabled = read32(BW_PI_IRQMASK);
 	u32 flags = read32(BW_PI_IRQFLAG);
+	u32 useflags = flags & enabled;
+	fired_irqs = flags;
 
-	flags &= enabled;
-
+	gfx_printf(" BW Fired: %08X *HW Fired: %08X\n", read32(HW_PPCIRQFLAG), read32(BW_PI_IRQFLAG));
+	gfx_printf(" BW Mask:  %08X *HW Mask:  %08X\n", read32(HW_PPCIRQMASK), read32(BW_PI_IRQMASK));
 	for(i = 0; i < BW_PI_IRQ_MAX; i++) {
-		if(flags & IRQF(i)) { 
+		printf("Interrupt check: %d.\n", i);
+		if(useflags & IRQF(i)) { 
+			printf("Did fire!\n");
 			if(irq_bw_pi_get_handler(i)) {
+				printf("We got a handler at 0x%08X\n", irq_bw_pi_get_handler(i));
 				(irq_bw_pi_get_handler(i))(i);
+				useflags &= ~IRQF(i);
 			}
 			write32(BW_PI_IRQFLAG, IRQF(i));
 		}
+	}
+	if(useflags) {
+		gfx_printf("IRQ: unhandled 0x%08x\n", useflags);
+		write32(BW_PI_IRQFLAG, useflags);
 	}
 }
 
@@ -229,13 +230,20 @@ void irq_bw_disable(u32 irq)
 
 void irq_hw_enable(u32 irq)
 {
-	set32(HW_PPCIRQMASK, IRQF(irq));
+	/* Remove the IRQ from the ARM and give it to the PPC */
+	mask32(HW_ARMIRQMASK, IRQF(irq), 0);
+	mask32(HW_PPCIRQMASK, 0, IRQF(irq));
+	
 	write32(HW_PPCIRQFLAG, IRQF(irq));
 	hw_enabled_irq |= IRQF(irq);
 }
 
 void irq_hw_disable(u32 irq)
 {
+	/* Remove the IRQ from the PPC and give it back to the ARM */
+	mask32(HW_PPCIRQMASK, IRQF(irq), 0);
+	mask32(HW_ARMIRQMASK, 0, IRQF(irq));
+	
 	write32(HW_PPCIRQFLAG, IRQF(irq));
 	clear32(HW_PPCIRQMASK, IRQF(irq));
 	hw_enabled_irq &= ~IRQF(irq);
@@ -273,6 +281,7 @@ u32 irq_disable()
 	ppcsync();
 	asm volatile("mfmsr %0" : "=r"(msrvalue) : );
 	irqs_on = 0;
+	fired_irqs = 0;
 	return was_on;
 }
 

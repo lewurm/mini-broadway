@@ -28,7 +28,7 @@ typedef struct {
 } gfx_rect;
 
 #define CONSOLE_WIDTH 500
-#define CONSOLE_LINES 10
+#define CONSOLE_LINES 20
 #define CONSOLE_Y 100
 
 #define CONSOLE_X  58

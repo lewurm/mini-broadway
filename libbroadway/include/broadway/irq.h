@@ -36,17 +36,22 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #define IRQF_TIMER	(IRQF(IRQ_TIMER))
 #define IRQF_NAND	(IRQF(IRQ_NAND))
 #define IRQF_AES	(IRQF(IRQ_AES))
+#define IRQF_SHA1	(IRQF(IRQ_SHA1))
+#define IRQF_EHCI 	(IRQF(IRQ_EHCI))
+#define IRQF_OHCI0 	(IRQF(IRQ_OHCI0))
+#define IRQF_OHCI1 	(IRQF(IRQ_OHCI1))
 #define IRQF_SDHC	(IRQF(IRQ_SDHC))
+#define IRQF_WIFI	(IRQF(IRQ_WIFI))
 #define IRQF_GPIO1B	(IRQF(IRQ_GPIO1B))
 #define IRQF_GPIO1	(IRQF(IRQ_GPIO1))
 #define IRQF_RESET	(IRQF(IRQ_RESET))
+#define IRQF_PPCIPC	(IRQF(IRQ_PPCIPC))
 #define IRQF_IPC	(IRQF(IRQ_IPC))
-#define IRQF_OHCI0 	(IRQF(IRQ_OHCI0))
-#define IRQF_OHCI1 	(IRQF(IRQ_OHCI1))
 
-#define IRQF_ALL	(IRQF_TIMER | IRQF_NAND  | IRQF_GPIO1B | IRQF_GPIO1 | \
-			 IRQF_RESET | IRQF_IPC   | IRQF_AES    | IRQF_SDHC  | \
-			 IRQF_OHCI0 | IRQF_OHCI1 )
+#define IRQF_ALL	(IRQF_TIMER  | IRQF_NAND   | IRQF_AES   | IRQF_SHA1  | \
+			 IRQF_EHCI   | IRQF_OHCI0  | IRQF_OHCI1 | IRQF_SDHC  | \
+			 IRQF_WIFI   | IRQF_GPIO1B | IRQF_GPIO1 | IRQF_RESET | \
+			 IRQF_PPCIPC | IRQF_IPC )
 
 /* Broadway Processor Interface Registers */
 #define BW_PI_IRQFLAG (0x0C003000)
@@ -67,8 +72,11 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #define BW_PI_IRQ_DEBUG 	12
 #define BW_PI_IRQ_HSP 	 	13
 #define BW_PI_IRQ_HW 		14 /* hollywood pic */
+#define BW_PI_IRQ_RESET_SW 	16
 /* Not a real IRQ, just a little helpful something */
-#define BW_PI_IRQ_MAX 		15
+#define BW_PI_IRQ_MAX 		32
+
+extern u32 reset_pressed;
 
 typedef int (*irq_handler_t)(u32 irq);
 
@@ -98,16 +106,6 @@ static inline void irq_wait(void)
 	__asm__ volatile ( "mcr\tp15, 0, %0, c7, c0, 4" : : "r" (data) );
 }
 */
-
-/*#else
-// stub functions allow us to avoid sprinkling other code with ifdefs
-static inline u32 irq_disable(void) {
-	return 0;
-}
-
-static inline void irq_restore(u32 was_on) {
-	(void)was_on;
-}*/
 #endif
 
 
