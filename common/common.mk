@@ -6,6 +6,7 @@ LD = $(PREFIX)gcc
 OBJCOPY = $(PREFIX)objcopy
 RANLIB = $(PREFIX)ranlib
 STRIP = $(PREFIX)strip
+ASFLAGS += -D_LANGUAGE_ASSEMBLY
 
 BIN2S = $(DEVKITPPC)/bin/bin2s
 
@@ -25,6 +26,8 @@ LDFLAGS	+= -L$(WIIDEV)/lib
 endif
 
 CFLAGS	+= $(INCLUDES)
+
+.PHONY: all clean upload
 
 all: $(TARGET)
 
@@ -56,6 +59,15 @@ endif
 clean:
 	rm -rf $(DEPDIR)
 	rm -f $(TARGET) $(TARGET).map $(OBJS) $(NOLINKOBJS)
+
+ifeq ($(ARCH),ppc)
+upload: $(TARGET)
+	@$(WIIDEV)/bin/bootmii -p $<
+endif
+ifeq ($(ARCH),arm)
+upload: $(TARGET)
+	@$(WIIDEV)/bin/bootmii -a $<
+endif
 
 define bin2o
 	@echo "  BIN2S     $(notdir $<)"

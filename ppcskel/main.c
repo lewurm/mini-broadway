@@ -7,6 +7,7 @@ Copyright (C) 2009              Andre Heider "dhewg" <dhewg@wiibrew.org>
 Copyright (C) 2008, 2009        Hector Martin "marcan" <marcan@marcansoft.com>
 Copyright (C) 2008, 2009        Sven Peter <svenpeter@gmail.com>
 Copyright (C) 2009              John Kelley <wiidev@kelley.ca>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -23,11 +24,11 @@ Copyright (C) 2009              John Kelley <wiidev@kelley.ca>
 #include <hextwelve.h>
 #include <hextwelve/core/core.h>
 #include <hextwelve/drivers/class/hid.h>
-#include "video_low.h"
-#include "input.h"
-#include "console.h"
+#include <video_low.h>
+#include <input.h>
+#include <console.h>
 
-#define MINIMUM_MINI_VERSION 0x00010001
+#define MINIMUM_MINI_VERSION 0x00010002
 
 char spinchrs[5] = "|/-\\";
 otp_t otp;
@@ -36,14 +37,15 @@ extern u32 irqs_on;
 extern u32 bw_enabled_irq;
 extern u32 hw_enabled_irq;
 extern u32 msrvalue;
+
 static void dsp_reset(void)
 {
-	write16(0x0c00500a, read16(0x0c00500a) & ~0x01f8);
-	write16(0x0c00500a, read16(0x0c00500a) | 0x0010);
-	write16(0x0c005036, 0);
+	mask16(0x0C00500A, 0x01F8, 0x0010);
+	write16(0x0C005036, 0);
 }
 
-static char ascii(char s) {
+static char ascii(char s)
+{
 	if(s < 0x20) return '.';
 	if(s > 0x7E) return '.';
 	return s;
@@ -53,16 +55,16 @@ void hexdump(void *d, int len) {
 	u8 *data;
 	int i, off;
 	data = (u8*)d;
-	for (off=0; off<len; off += 16) {
+	for(off = 0; off < len; off += 16) {
 		printf("%08x  ",off);
-		for(i=0; i<16; i++)
-			if((i+off)>=len) printf("   ");
-			else printf("%02x ",data[off+i]);
+		for(i = 0; i < 16; i++)
+			if((i + off) >= len) printf("   ");
+			else printf("%02x ", data[off + i]);
 
 		printf(" ");
-		for(i=0; i<16; i++)
-			if((i+off)>=len) printf(" ");
-			else printf("%c",ascii(data[off+i]));
+		for(i = 0; i < 16; i++)
+			if((i + off) >= len) printf(" ");
+			else printf("%c", ascii(data[off + i]));
 		printf("\n");
 	}
 }
@@ -84,6 +86,7 @@ void testOTP(void)
 
 int main(void)
 {
+	u16 ret;
 	int vmode = -1;
 	exception_init();
 	dsp_reset();
@@ -103,30 +106,33 @@ int main(void)
 	VIDEO_SetFrameBuffer(get_xfb());
 	VISetupEncoder();
 
+	gfx_printf("\n\n");
 	u32 version = ipc_getvers();
 	u16 mini_version_major = version >> 16 & 0xFFFF;
 	u16 mini_version_minor = version & 0xFFFF;
-	printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
-
-	if (version < MINIMUM_MINI_VERSION) {
-		printf("Sorry, this version of MINI (armboot.bin)\n"
-			"is too old, please update to at least %d.%0d.\n", 
-			(MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
-		return 1;	/* Here's a better idea: return. */
-				/* The crt0 just infinite loops for us upon return. */
+	gfx_printf("Mini version: %d.%0d\n", mini_version_major, mini_version_minor);
+	
+	if(version < MINIMUM_MINI_VERSION) {
+		gfx_printf("Sorry, this version of MINI (armboot.bin)\n"
+			   "is too old, please update to at least %d.%0d.\n", 
+			   (MINIMUM_MINI_VERSION >> 16), (MINIMUM_MINI_VERSION & 0xFFFF));
+		/* Here's a better idea:
+		 * Return because our crt0 can handle it :)
+		 */
+		return 1;
 	}
-	gfx_printf("\n\n");
+	
 	gfx_printf("Initing hextwelve!\n");
 	usleep(10000);
-	if(!hextwelve_init()) {
-		gfx_printf("Unable to init hextwelve! bailing!\n");
+	if((ret = hextwelve_init())) {
+		gfx_printf("Unable to init hextwelve %d! bailing!\n", ret);
 		return 1;
 	}
 	gfx_printf("Success. Initing IRQs...\n");
 	gfx_printf(" and starting core...\n");
 	usleep(10000);
 	/* external ohci */
-//	irq_hw_enable(IRQ_OHCI0);
+	irq_hw_enable(IRQ_OHCI0);
 	/* internal ohci */
 	//irq_hw_enable(IRQ_OHCI1);
 	
@@ -167,7 +173,7 @@ wait_kb:
 #define TABSIZE 4
 	/* you are welcome to make this nice :) */
 	char str[7];
-	u16 i, j, ret=0, y=STDOUT_BORDER_TOP, x=STDOUT_BORDER_LEFT;
+	u16 i, j, y=STDOUT_BORDER_TOP, x=STDOUT_BORDER_LEFT;
 	u16 old_x, old_y;
 	struct kbrep *k, *old=NULL;
 

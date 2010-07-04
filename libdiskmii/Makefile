@@ -13,6 +13,8 @@ OBJS = diskio.o diskmii.o syncobj.o ff.o unicode.o nandfs.o cache.o
 
 include $(WIIDEV)/common.mk
 
+.PHONY: install
+
 install: $(TARGET)
 	@echo "  COPY      $(TARGET)"
 	@cp $(TARGET) $(WIIDEV)/lib

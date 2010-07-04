@@ -4,7 +4,7 @@
 
 Copyright (C) 2009		Bernhard Urban <lewurm@gmx.net>
 Copyright (C) 2009		Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
-Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -70,7 +70,7 @@ Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
 /* Not a real IRQ, just a little helpful something */
 #define BW_PI_IRQ_MAX 		15
 
-typedef int (irq_handler_t)(u32 irq);
+typedef int (*irq_handler_t)(u32 irq);
 
 void irq_initialize(void);
 void irq_shutdown(void);
@@ -86,10 +86,10 @@ void irq_enable(void);
 u32 irq_disable(void);
 void irq_restore(u32 was_on);
 
-int irq_register_handler(u32 irqn, irq_handler_t* irqh);
-irq_handler_t* irq_get_handler(u32 irqn);
-int irq_bw_pi_register_handler(u32 irqn, irq_handler_t* irqh);
-irq_handler_t* irq_bw_pi_get_handler(u32 irqn);
+int irq_register_handler(u32 irqn, irq_handler_t irqh);
+irq_handler_t irq_get_handler(u32 irqn);
+int irq_bw_pi_register_handler(u32 irqn, irq_handler_t irqh);
+irq_handler_t irq_bw_pi_get_handler(u32 irqn);
 
 /* TODO: port to ppc 
 static inline void irq_wait(void)

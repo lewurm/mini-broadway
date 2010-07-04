@@ -1,6 +1,6 @@
 /*****************************************************************************
  *  Cache for LibELM                                                         *
- *  By yellow.wood.goblin and SquidMan                                       *
+ *  By yellow.wood.goblin and trap15                                         *
  *****************************************************************************/
 
 #include <broadway.h>

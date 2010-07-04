@@ -1,13 +1,11 @@
+#if _FS_REENTRANT
 /*------------------------------------------------------------------------*/
 /* OS independant sync objects. Using µSync.                              */
-/* for LibELM  (C)SquidMan, 2009                                          */
 /*------------------------------------------------------------------------*/
 
 #include <broadway.h>
 #include <diskmii/ffconf.h>
 #include <usync.h>
-
-#if _FS_REENTRANT
 
 #define REQUEST_COUNT	10
 

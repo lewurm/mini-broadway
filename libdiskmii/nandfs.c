@@ -206,6 +206,7 @@ s32 nandfs_read(void *ptr, u32 size, u32 nmemb, struct nandfs_fp *fp)
 		if(copy_len > total)
 			copy_len = total;
 		memcpy(ptr, buffer + copy_offset, copy_len);
+		ptr += copy_len;
 		total -= copy_len;
 		fp->offset += copy_len;
 

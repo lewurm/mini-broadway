@@ -1,0 +1,7 @@
+*.o
+*.elf
+*.bin
+*.map
+.DS_Store
+.deps
+*.d

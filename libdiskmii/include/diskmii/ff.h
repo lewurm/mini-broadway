@@ -18,7 +18,9 @@
 
 #include <types.h>			/* Basic integer types */
 #include <diskmii/ffconf.h>		/* FatFs configuration options */
+#if _FS_REENTRANT
 #include <usync.h>
+#endif
 
 #if _FATFS != _FFCONFIG
 #error Wrong configuration file (ffconf.h).

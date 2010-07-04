@@ -3,8 +3,9 @@
 	low-level video support for the BootMii UI
 
 Copyright (C) 2008, 2009	Hector Martin "marcan" <marcan@marcansoft.com>
-Copyright (C) 2009			Haxx Enterprises <bushing@gmail.com>
+Copyright (C) 2009		Haxx Enterprises <bushing@gmail.com>
 Copyright (c) 2009		Sven Peter <svenpeter@gmail.com>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -14,8 +15,8 @@ Some routines and initialization constants originally came from the
 of Crazy Nation and the GC Linux project.
 */
 
-#include <broadway/bootmii_ppc.h>
-#include "video_low.h"
+#include <broadway.h>
+#include <video_low.h>
 #include <string.h>
 
 #ifdef VI_DEBUG
@@ -69,8 +70,8 @@ static int video_mode;
 
 void VIDEO_Init(int VideoMode)
 {
-	u32 Counter=0;
-	const u16 *video_initstate=NULL;
+	u32 i;
+	const u16 *video_initstate = NULL;
 
 	VI_debug("Resetting VI...\n");
 	write16(R_VIDEO_STATUS1, 2);
@@ -78,38 +79,30 @@ void VIDEO_Init(int VideoMode)
 	write16(R_VIDEO_STATUS1, 0);
 	VI_debug("VI reset...\n");
 
-	switch(VideoMode)
-	{
-	case VIDEO_640X480_NTSCi_YUV16:
-		video_initstate = VIDEO_Mode640X480NtsciYUV16;
-		break;
-
-	case VIDEO_640X480_PAL50_YUV16:
-		video_initstate = VIDEO_Mode640X480Pal50YUV16;
-		break;
-
-	case VIDEO_640X480_PAL60_YUV16:
-		video_initstate = VIDEO_Mode640X480Pal60YUV16;
-		break;
-
-	case VIDEO_640X480_NTSCp_YUV16:
-		video_initstate = VIDEO_Mode640X480NtscpYUV16;
-		break;
-
-	/* Use NTSC as default */
-	default:
-		VideoMode = VIDEO_640X480_NTSCi_YUV16;
-		video_initstate = VIDEO_Mode640X480NtsciYUV16;
-		break;
+	switch(VideoMode) {
+		/* Use NTSCi as default */
+		default:
+			VideoMode = VIDEO_640X480_NTSCi_YUV16;
+		case VIDEO_640X480_NTSCi_YUV16:
+			video_initstate = VIDEO_Mode640X480NtsciYUV16;
+			break;
+		case VIDEO_640X480_PAL50_YUV16:
+			video_initstate = VIDEO_Mode640X480Pal50YUV16;
+			break;
+		case VIDEO_640X480_PAL60_YUV16:
+			video_initstate = VIDEO_Mode640X480Pal60YUV16;
+			break;
+		case VIDEO_640X480_NTSCp_YUV16:
+			video_initstate = VIDEO_Mode640X480NtscpYUV16;
+			break;
 	}
 	
 	VI_debug("Configuring VI...\n");
-	for(Counter=0; Counter<64; Counter++)
-	{
-		if(Counter==1)
-			write16(MEM_VIDEO_BASE + 2*Counter, video_initstate[Counter] & 0xFFFE);
+	for(i = 0; i < 64; i++) {
+		if(i == 1)
+			write16(MEM_VIDEO_BASE + 2 * i, video_initstate[i] & 0xFFFE);
 		else
-			write16(MEM_VIDEO_BASE + 2*Counter, video_initstate[Counter]);
+			write16(MEM_VIDEO_BASE + 2 * i, video_initstate[i]);
 	}
 
 	video_mode = VideoMode;
@@ -117,8 +110,8 @@ void VIDEO_Init(int VideoMode)
 	write16(R_VIDEO_STATUS1, video_initstate[1]);
 #ifdef VI_DEBUG
 	VI_debug("VI dump:\n");
-	for(Counter=0; Counter<32; Counter++)
-		printf("%02x: %04x %04x,\n", Counter*4, read16(MEM_VIDEO_BASE + Counter*4), read16(MEM_VIDEO_BASE + Counter*4+2));
+	for(i = 0; i < 32; i++)
+		printf("%02x: %04x %04x,\n", i * 4, read16(MEM_VIDEO_BASE + i * 4), read16(MEM_VIDEO_BASE + i * 4 + 2));
 
 	printf("---\n");
 #endif
@@ -163,45 +156,32 @@ void VIDEO_Shutdown(void)
 	write16(R_VIDEO_STATUS1, 0);
 }
 
-#define		HW_REG_BASE		0xd800000
-
-// PPC side of GPIO1 (Starlet can access this too)
-// Output state
-#define		HW_GPIO1BOUT		(HW_REG_BASE + 0x0c0)
-// Direction (1=output)
-#define		HW_GPIO1BDIR		(HW_REG_BASE + 0x0c4)
-// Input state
-#define		HW_GPIO1BIN			(HW_REG_BASE + 0x0c8)
-
-#define SLAVE_AVE 0xe0
+#define SLAVE_AVE 0xE0
 
 static inline void aveSetDirection(u32 dir)
 {
-	u32 val = (read32(HW_GPIO1BDIR)&~0x8000)|0x4000;
+	u32 val = (read32(HW_GPIO1BDIR) & ~0x8000) | 0x4000;
 	if(dir) val |= 0x8000;
 	write32(HW_GPIO1BDIR, val);
 }
 
 static inline void aveSetSCL(u32 scl)
 {
-	u32 val = read32(HW_GPIO1BOUT)&~0x4000;
+	u32 val = read32(HW_GPIO1BOUT) & ~0x4000;
 	if(scl) val |= 0x4000;
 	write32(HW_GPIO1BOUT, val);
 }
 
 static inline void aveSetSDA(u32 sda)
 {
-	u32 val = read32(HW_GPIO1BOUT)&~0x8000;
+	u32 val = read32(HW_GPIO1BOUT) & ~0x8000;
 	if(sda) val |= 0x8000;
 	write32(HW_GPIO1BOUT, val);
 }
 
 static inline u32 aveGetSDA()
 {
-	if(read32(HW_GPIO1BIN)&0x8000)
-		return 1;
-	else
-		return 0;
+	return (read32(HW_GPIO1BIN) & 0x8000) ? 1 : 0;
 }
 
 static u32 __sendSlaveAddress(u8 addr)
@@ -212,8 +192,8 @@ static u32 __sendSlaveAddress(u8 addr)
 	udelay(2);
 
 	aveSetSCL(0);
-	for(i=0;i<8;i++) {
-		if(addr&0x80) aveSetSDA(1);
+	for(i = 0; i < 8; i++) {
+		if(addr & 0x80) aveSetSDA(1);
 		else aveSetSDA(0);
 		udelay(2);
 
@@ -230,7 +210,7 @@ static u32 __sendSlaveAddress(u8 addr)
 	aveSetSCL(1);
 	udelay(2);
 
-	if(aveGetSDA()!=0) {
+	if(aveGetSDA() != 0) {
 		VI_debug("No ACK\n");
 		return 0;
 	}
@@ -245,10 +225,10 @@ static u32 __sendSlaveAddress(u8 addr)
 static u32 __VISendI2CData(u8 addr,void *val,u32 len)
 {
 	u8 c;
-	u32 i,j;
+	u32 i, j;
 	u32 ret;
 
-	VI_debug("I2C[%02x]:",addr);
+	VI_debug("I2C[%02x]:", addr);
 	for(i=0;i<len;i++)
 		VI_debug(" %02x", ((u8*)val)[i]);
 	VI_debug("\n");
@@ -260,15 +240,15 @@ static u32 __VISendI2CData(u8 addr,void *val,u32 len)
 	udelay(4);
 
 	ret = __sendSlaveAddress(addr);
-	if(ret==0) {
+	if(ret == 0) {
 		return 0;
 	}
 
 	aveSetDirection(1);
-	for(i=0;i<len;i++) {
+	for(i = 0; i < len; i++) {
 		c = ((u8*)val)[i];
-		for(j=0;j<8;j++) {
-			if(c&0x80) aveSetSDA(1);
+		for(j = 0; j < 8; j++) {
+			if(c & 0x80) aveSetSDA(1);
 			else aveSetSDA(0);
 			udelay(2);
 
@@ -283,7 +263,7 @@ static u32 __VISendI2CData(u8 addr,void *val,u32 len)
 		aveSetSCL(1);
 		udelay(2);
 
-		if(aveGetSDA()!=0) {
+		if(aveGetSDA() != 0) {
 			VI_debug("No ACK\n");
 			return 0;
 		}
@@ -306,7 +286,7 @@ static void __VIWriteI2CRegister8(u8 reg, u8 data)
 	u8 buf[2];
 	buf[0] = reg;
 	buf[1] = data;
-	__VISendI2CData(SLAVE_AVE,buf,2);
+	__VISendI2CData(SLAVE_AVE, buf, 2);
 	udelay(2);
 }
 
@@ -316,7 +296,7 @@ static void __VIWriteI2CRegister16(u8 reg, u16 data)
 	buf[0] = reg;
 	buf[1] = data >> 8;
 	buf[2] = data & 0xFF;
-	__VISendI2CData(SLAVE_AVE,buf,3);
+	__VISendI2CData(SLAVE_AVE, buf, 3);
 	udelay(2);
 }
 
@@ -328,7 +308,7 @@ static void __VIWriteI2CRegister32(u8 reg, u32 data)
 	buf[2] = (data >> 16) & 0xFF;
 	buf[3] = (data >> 8) & 0xFF;
 	buf[4] = data & 0xFF;
-	__VISendI2CData(SLAVE_AVE,buf,5);
+	__VISendI2CData(SLAVE_AVE, buf, 5);
 	udelay(2);
 }
 
@@ -337,7 +317,7 @@ static void __VIWriteI2CRegisterBuf(u8 reg, int size, u8 *data)
 	u8 buf[0x100];
 	buf[0] = reg;
 	memcpy(&buf[1], data, size);
-	__VISendI2CData(SLAVE_AVE,buf,size+1);
+	__VISendI2CData(SLAVE_AVE, buf, size + 1);
 	udelay(2);
 }
 
@@ -345,22 +325,22 @@ static void __VISetYUVSEL(u8 dtvstatus)
 {
 	int vdacFlagRegion;
 	switch(video_mode) {
-	case VIDEO_640X480_NTSCi_YUV16:
-	case VIDEO_640X480_NTSCp_YUV16:
-	default:
-		vdacFlagRegion = 0;
-		break;
-	case VIDEO_640X480_PAL50_YUV16:
-	case VIDEO_640X480_PAL60_YUV16:
-		vdacFlagRegion = 2;
-		break;
+		case VIDEO_640X480_NTSCi_YUV16:
+		case VIDEO_640X480_NTSCp_YUV16:
+		default:
+			vdacFlagRegion = 0;
+			break;
+		case VIDEO_640X480_PAL50_YUV16:
+		case VIDEO_640X480_PAL60_YUV16:
+			vdacFlagRegion = 2;
+			break;
 	}
 	__VIWriteI2CRegister8(0x01, (dtvstatus<<5) | (vdacFlagRegion&0x1f));
 }
 
 static void __VISetFilterEURGB60(u8 enable)
 {
-	__VIWriteI2CRegister8(0x6e, enable);
+	__VIWriteI2CRegister8(0x6E, enable);
 }
 
 void VISetupEncoder(void)

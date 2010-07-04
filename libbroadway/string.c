@@ -2,7 +2,7 @@
 
 Copyright (C) 2008		Segher Boessenkool <segher@kernel.crashing.org>
 Copyright (C) 2009		Haxx Enterprises <bushing@gmail.com>
-Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 Portions taken from the Public Domain C Library (PDCLib).
 https://negix.net/trac/pdclib

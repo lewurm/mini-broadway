@@ -1,7 +1,7 @@
 /*
 	libhextwelve -- a USB library for the BootMii platform
  
-Copyright (C) 2009	Alex Marshall <SquidMan72@gmail.com>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
  
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
@@ -18,9 +18,17 @@ Copyright (C) 2009	Alex Marshall <SquidMan72@gmail.com>
 
 int _irq_handler_ohci(u32 irq)
 {
-	u32 base = OHCI0_REG_BASE;
-	if(irq == IRQ_OHCI1)
-		base = OHCI1_REG_BASE;
+	u32 base;
+	switch(irq) {
+		case IRQ_OHCI0:
+			base = OHCI0_REG_BASE;
+			break;
+		case IRQ_OHCI1:
+			base = OHCI1_REG_BASE;
+			break;
+		default: /* Uhh... */
+			return 1;
+	}
 	hcdi_irq(base);
 	(void)irq;
 	return 1;
@@ -28,21 +36,23 @@ int _irq_handler_ohci(u32 irq)
 
 int hextwelve_init()
 {
+	int ret = 0;
 	if(!irq_register_handler(IRQ_OHCI0, _irq_handler_ohci))
-		return 0;
+		ret |= 1;
 	if(!irq_register_handler(IRQ_OHCI1, _irq_handler_ohci))
-		return 0;
-	return 1;
+		ret |= 2;
+	return ret;
 }
 
 int hextwelve_quit()
 {
+	int ret = 0;
 	if(irq_get_handler(IRQ_OHCI0))
 		if(!irq_register_handler(IRQ_OHCI0, NULL))
-			return 0;
+			ret |= 1;
 	if(irq_get_handler(IRQ_OHCI1))
 		if(!irq_register_handler(IRQ_OHCI1, NULL))
-			return 0;
-	return 1;
+			ret |= 2;
+	return ret;
 }
 

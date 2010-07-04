@@ -151,7 +151,7 @@
 /  performance and code size. */
 
 
-#define _FS_REENTRANT	1
+#define _FS_REENTRANT	0
 #define _FS_TIMEOUT	1000		/* Timeout period in unit of time ticks of the OS */
 #define	_SYNC_t		uSyncObject*	/* Type of sync object used on the OS. e.g. HANDLE, OS_EVENT*, ID and etc.. */
 /* The _FS_REENTRANT option switches the reentrancy of the FatFs module.

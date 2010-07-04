@@ -35,24 +35,33 @@ typedef signed int			ssize_t;
 #define NULL	((void *)0)
 
 /* These types must be 16-bit, 32-bit or larger integer */
-typedef int				INT;
-typedef unsigned int			UINT;
+typedef s32				INT;
+typedef u32				UINT;
 
 /* These types must be 8-bit integer */
-typedef signed char			CHAR;
-typedef unsigned char			UCHAR;
-typedef unsigned char			BYTE;
+typedef s8				CHAR;
+typedef u8				UCHAR;
+typedef u8				BYTE;
 
 /* These types must be 16-bit integer */
-typedef short				SHORT;
-typedef unsigned short			USHORT;
-typedef unsigned short			WORD;
-typedef unsigned short			WCHAR;
+typedef s16				SHORT;
+typedef u16				USHORT;
+typedef u16				WORD;
+typedef u16				WCHAR;
 
 /* These types must be 32-bit integer */
-typedef long				LONG;
-typedef unsigned long			ULONG;
-typedef unsigned long			DWORD;
+typedef s32				LONG;
+typedef u32				ULONG;
+typedef u32				DWORD;
+
+typedef s8				int8_t;
+typedef s16				int16_t;
+typedef s32				int32_t;
+typedef s64				int64_t;
+typedef u8				uint8_t;
+typedef u16				uint16_t;
+typedef u32				uint32_t;
+typedef u64				uint64_t;
 
 /* Boolean type */
 typedef enum { FALSE = 0, TRUE } BOOL;

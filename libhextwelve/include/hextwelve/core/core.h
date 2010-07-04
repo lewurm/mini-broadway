@@ -55,7 +55,7 @@ inline static void wait_ms(int ms)
 		udelay(1000);
 }
 
-struct usb_device {
+typedef struct usb_device {
 	u8 address;
 	u8 fullspeed;
 	u32 ohci;
@@ -81,9 +81,9 @@ struct usb_device {
 
 	struct usb_conf *conf;
 	struct usb_device *next;
-};
+} usb_device;
 
-struct usb_conf {
+typedef struct usb_conf {
 	u8 bLength;
 	u8 bDescriptorType;
 	u16 wTotalLength;
@@ -95,9 +95,9 @@ struct usb_conf {
 
 	struct usb_conf *next;
 	struct usb_intf *intf;
-};
+} usb_conf;
 
-struct usb_intf {
+typedef struct usb_intf {
 	u8 bLength;
 	u8 bDescriptorType;
 	u8 bInterfaceNumber;
@@ -110,9 +110,9 @@ struct usb_intf {
 
 	struct usb_intf *next;
 	struct usb_endp *endp;
-};
+} usb_intf;
 
-struct usb_endp {
+typedef struct usb_endp {
 	u8 bLength;
 	u8 bDescriptorType;
 	u8 bEndpointAddress;
@@ -121,40 +121,40 @@ struct usb_endp {
 	u8 bInterval;
 
 	struct usb_endp *next;
-};
+} usb_endp;
 
-struct usb_endpoint {
+typedef struct usb_endpoint {
 	u8 type;
 	u8 size;
 	u8 togl;
 	struct usb_endpoint *next;
-};
+} usb_endpoint;
 
-struct usb_transfer_descriptor_ep {
+typedef struct usb_transfer_descriptor_ep {
 	struct usb_transfer_descriptor_ep *next;
 	u8 device_address;
 	u8 endpoint;
 	struct usb_transfer_descriptor *start;
-};
+} usb_transfer_descriptor_ep;
 
 /**
  * USB Driver data structure
  */
-struct usb_driver {
+typedef struct usb_driver {
 	char* name;
 	void (*probe)(void);
 	void (*check)(void);
 	void (*remove)(void);
 	void *data;
 	struct usb_driver *next;
-};
+} usb_driver;
 
 
 /**
  * I/O Request Block
  */
 
-struct usb_irp {
+typedef struct usb_irp {
 	struct usb_device *dev;
 	/* ep -> bit 7 is for direction 1=from	dev to host */
 	u8 endpoint;
@@ -167,13 +167,13 @@ struct usb_irp {
 
 	//list * td_list;
 	u16 timeout;
-};
+} usb_irp;
 
 
 /**
  * usb transfer descriptor
  */
-struct usb_transfer_descriptor {
+typedef struct usb_transfer_descriptor {
 	u8 devaddress;
 	u8 endpoint;
 	u8 fullspeed;
@@ -190,7 +190,7 @@ struct usb_transfer_descriptor {
 	u8 state;
 	struct usb_transfer_descriptor *next;
 	u8 maxp;
-};
+} usb_transfer_descriptor;
 
 struct usb_core {
 	u8 nextaddress;

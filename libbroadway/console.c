@@ -9,9 +9,9 @@ Copyright (C) 2009		John Kelley <wiidev@kelley.ca>
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 */
 
-#include <broadway/bootmii_ppc.h>
-#include "video_low.h"
-#include "console.h"
+#include <broadway.h>
+#include <video_low.h>
+#include <console.h>
 #include <string.h>
 #include <printf.h>
 #include <malloc.h>
@@ -44,7 +44,8 @@ u32 *get_xfb(void) {
 	return xfb;
 }
 
-static void memcpy32(u32 *dst, u32 *src, u32 count) {
+static void memcpy32(u32 *dst, u32 *src, u32 count)
+{
 	while(count--) {
 		*dst = *src;
 		sync_after_write((const void *)dst, 4);
@@ -54,7 +55,8 @@ static void memcpy32(u32 *dst, u32 *src, u32 count) {
 	}
 }
 
-static void memset32(u32 *dst, u32 setval, u32 count) {
+static void memset32(u32 *dst, u32 setval, u32 count)
+{
 	while(count--) {
 		*dst = setval;
 		sync_after_write((const void *)dst, 4);
@@ -63,31 +65,34 @@ static void memset32(u32 *dst, u32 setval, u32 count) {
 	}
 }
 
-u32 pal_idx(int i, u8 *pal, u8 *gfx) { 
+u32 pal_idx(int i, u8 *pal, u8 *gfx)
+{ 
 	u32 pidx = gfx[i];
 	pidx *= 3;
 
 	return (pal[pidx+0] << 16) | (pal[pidx+1] << 8) | (pal[pidx+2]);
 }
 
-int make_yuv(u8 r1, u8 g1, u8 b1, u8 r2, u8 g2, u8 b2) {
-  int y1, cb1, cr1, y2, cb2, cr2, cb, cr;
- 
-  y1 = (299 * r1 + 587 * g1 + 114 * b1) / 1000;
-  cb1 = (-16874 * r1 - 33126 * g1 + 50000 * b1 + 12800000) / 100000;
-  cr1 = (50000 * r1 - 41869 * g1 - 8131 * b1 + 12800000) / 100000;
- 
-  y2 = (299 * r2 + 587 * g2 + 114 * b2) / 1000;
-  cb2 = (-16874 * r2 - 33126 * g2 + 50000 * b2 + 12800000) / 100000;
-  cr2 = (50000 * r2 - 41869 * g2 - 8131 * b2 + 12800000) / 100000;
- 
-  cb = (cb1 + cb2) >> 1;
-  cr = (cr1 + cr2) >> 1;
- 
-  return ((y1 << 24) | (cb << 16) | (y2 << 8) | cr);
+int make_yuv(u8 r1, u8 g1, u8 b1, u8 r2, u8 g2, u8 b2)
+{
+	int y1, cb1, cr1, y2, cb2, cr2, cb, cr;
+
+	y1 = (299 * r1 + 587 * g1 + 114 * b1) / 1000;
+	cb1 = (-16874 * r1 - 33126 * g1 + 50000 * b1 + 12800000) / 100000;
+	cr1 = (50000 * r1 - 41869 * g1 - 8131 * b1 + 12800000) / 100000;
+
+	y2 = (299 * r2 + 587 * g2 + 114 * b2) / 1000;
+	cb2 = (-16874 * r2 - 33126 * g2 + 50000 * b2 + 12800000) / 100000;
+	cr2 = (50000 * r2 - 41869 * g2 - 8131 * b2 + 12800000) / 100000;
+
+	cb = (cb1 + cb2) >> 1;
+	cr = (cr1 + cr2) >> 1;
+
+	return ((y1 << 24) | (cb << 16) | (y2 << 8) | cr);
 }
 
-void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
+void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b)
+{
 	u32 *fb = xfb;
 	u32 col = make_yuv(r,g,b, r,g,b);
 
@@ -100,7 +105,8 @@ void fill_rect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
 	}
 }
 
-void gfx_draw_rect(gfx_rect *n) {
+void gfx_draw_rect(gfx_rect *n)
+{
         u32 y;
         gfx_rect *d_rect;
         u32 *fb = xfb;
@@ -116,7 +122,8 @@ void gfx_draw_rect(gfx_rect *n) {
         }
 }
 
-void scroll(void) {
+void scroll(void)
+{
 	unsigned int y;
 	u32 *fb = xfb;
 
@@ -134,7 +141,8 @@ void scroll(void) {
 		CONSOLE_WIDTH, CONSOLE_ROW_HEIGHT, 0, 0, 0);
 }
 
-void print_str_noscroll(int x, int y, char *str) {
+void print_str_noscroll(int x, int y, char *str)
+{
 	unsigned int i;
 	gfx_rect d_char;
 
@@ -157,7 +165,8 @@ void print_str_noscroll(int x, int y, char *str) {
 	}
 }
 
-void print_str(const char *str, size_t len) {
+void print_str(const char *str, size_t len)
+{
 	unsigned int i;
 	gfx_rect d_char;
 
@@ -193,22 +202,23 @@ int gfx_printf(const char *fmt, ...)
 	return i;
 }
 
-void font_to_yuv(void) {
+void font_to_yuv(void)
+{
 	int i, x, y;
 	u8 lr,lg,lb, rr,rg,rb;
 
 	for (i = 0; i < 255; i++) {
 		font_yuv[i] = (u32*)malloc(8*CONSOLE_CHAR_HEIGHT*2);
 
-		for (y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
-			for (x = 0; x < 8; x+=2) {
-				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (7-x)) & 0x01) == 1) {
+		for(y = 0; y < CONSOLE_CHAR_HEIGHT; y++) {
+			for(x = 0; x < 8; x += 2) {
+				if(((console_font_8x16[(i * CONSOLE_CHAR_HEIGHT) + y] >> (7-x)) & 0x01) == 1) {
 					lr = 255; lg = 255; lb = 255;
 				} else {
 					lr = 0; lg = 0; lb = 0;
 				}
 
-				if (((console_font_8x16[(i*CONSOLE_CHAR_HEIGHT)+y] >> (7-(x+1))) & 0x01) == 1) {
+				if (((console_font_8x16[(i * CONSOLE_CHAR_HEIGHT) + y] >> (7-(x+1))) & 0x01) == 1) {
 					rr = 255; rg = 255; rb = 255;
 				} else {
 					rr = 0; rg = 0; rb = 0;
@@ -220,7 +230,8 @@ void font_to_yuv(void) {
 	}
 }
 
-void init_fb(int vmode) {
+void init_fb(int vmode)
+{
 	int i;
 	u32 *fb;
 	u32 fill_col = make_yuv(0,0,0, 0,0,0);
@@ -239,10 +250,10 @@ void init_fb(int vmode) {
 		break;
 	}
 
-	xfb = memalign(32, 640 * (480 + (y_add*2)) * 2);
+	xfb = memalign(32, 640 * (480 + (y_add * 2)) * 2);
 
 	fb  = xfb;
-	for (i = 0; i < (480 + (y_add*2)) * 2 * (640 >> 1); i++) {
+	for(i = 0; i < (480 + (y_add * 2)) * 2 * (640 >> 1); i++) {
 		*fb = fill_col;
 		sync_after_write(fb, 4);
 		fb++;

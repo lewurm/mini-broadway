@@ -10,13 +10,13 @@ INCLUDES += -Iinclude
 CFLAGS += -Wno-unused-parameter 
 
 #debug flags; DU = Debug USB
-#CFLAGS += -D _DU_OHCI_F #fire @ u/h/ohci.c
-CFLAGS += -D _DU_OHCI_F_HALT #halted @ u/h/ohci.c
-#CFLAGS += -D _DU_OHCI_Q #enqueue @ u/h/ohci.c
-#CFLAGS += -D _DU_OHCI_RH #roothub @ u/h/ohci.c
-CFLAGS += -D _DU_CORE #@ u/c/core.c
-#CFLAGS += -D _DU_CORE_ADD #@ u/c/core.c
-CFLAGS += -D _DU_USB #@ u/c/usb.c
+#CFLAGS += -D_DU_OHCI_F      # fire @ u/h/ohci.c
+CFLAGS  += -D_DU_OHCI_F_HALT # halted @ u/h/ohci.c
+#CFLAGS += -D_DU_OHCI_Q      # enqueue @ u/h/ohci.c
+#CFLAGS += -D_DU_OHCI_RH     # roothub @ u/h/ohci.c
+CFLAGS  += -D_DU_CORE        # @ u/c/core.c
+#CFLAGS += -D_DU_CORE_ADD    # @ u/c/core.c
+CFLAGS  += -D_DU_USB         # @ u/c/usb.c
 
 TARGET = libhextwelve.a
 
@@ -24,6 +24,7 @@ OBJS = host/ohci.o core/core.o core/usb.o lib/list.o drivers/class/hid.o hextwel
 
 include $(WIIDEV)/common.mk
 
+.PHONY: install
 install: $(TARGET)
 	@echo "  COPY      $(TARGET)"
 	@cp $(TARGET) $(WIIDEV)/lib

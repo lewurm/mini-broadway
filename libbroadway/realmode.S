@@ -66,10 +66,10 @@ _realmode_vector:
 
 	// clear all BATs
 	li 0,0
-	mtspr 528,0 ; mtspr 530,0 ; mtspr 532,0 ; mtspr 534,0 // IBATU 0..3
-	mtspr 536,0 ; mtspr 538,0 ; mtspr 540,0 ; mtspr 542,0 // DBATU 0..3
-	mtspr 560,0 ; mtspr 562,0 ; mtspr 564,0 ; mtspr 566,0 // IBATU 4..7
-	mtspr 568,0 ; mtspr 570,0 ; mtspr 572,0 ; mtspr 574,0 // DBATU 4..7
+	mtspr IBAT0U,0 ; mtspr IBAT1U,0 ; mtspr IBAT2U,0 ; mtspr IBAT3U,0 // IBATU 0..3
+	mtspr DBAT0U,0 ; mtspr DBAT1U,0 ; mtspr DBAT2U,0 ; mtspr DBAT3U,0 // DBATU 0..3
+	mtspr IBAT4U,0 ; mtspr IBAT5U,0 ; mtspr IBAT6U,0 ; mtspr IBAT7U,0 // IBATU 4..7
+	mtspr DBAT4U,0 ; mtspr DBAT5U,0 ; mtspr DBAT6U,0 ; mtspr DBAT7U,0 // DBATU 4..7
 	isync
 
 	// clear all SRs

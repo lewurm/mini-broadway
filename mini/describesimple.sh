@@ -1,5 +1,6 @@
 #!/bin/sh
 
+pushd ../
 # Check for git and a git repo.
 if head=`git rev-parse --verify HEAD 2>/dev/null`; then
 	comm=`git log --pretty=oneline -n1 | awk ' { print $1 }'`
@@ -9,5 +10,6 @@ if head=`git rev-parse --verify HEAD 2>/dev/null`; then
 	git update-index --refresh --unmerged > /dev/null
 	git diff-index --quiet HEAD || printf "%s" '*'
 fi
+popd
 
 echo

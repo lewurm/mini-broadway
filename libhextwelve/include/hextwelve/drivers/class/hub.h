@@ -35,6 +35,8 @@
 #ifndef _HUB_H
 #define _HUB_H
 
+#include <hextwelve/core/core.h>
+
 void usb_hub_init();
 void usb_hub_probe();
 

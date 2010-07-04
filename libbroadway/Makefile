@@ -1,15 +1,17 @@
 MAKING_LIBBROADWAY = 1
 include ../common/broadway.mk
 
-DEFINES = -DLACKS_SYS_TYPES_H -DLACKS_ERRNO_H -DLACKS_STDLIB_H -DLACKS_STRING_H -DLACKS_STRINGS_H -DLACKS_UNISTD_H
-INCLUDES = -Iinclude
+DEFINES += -DLACKS_SYS_TYPES_H -DLACKS_ERRNO_H -DLACKS_STDLIB_H -DLACKS_STRING_H -DLACKS_STRINGS_H -DLACKS_UNISTD_H
+INCLUDES += -Iinclude
 
 TARGET = libbroadway.a
 
-OBJS = string.o sync.o time.o printf.o exception.o exception_2200.o malloc.o gecko.o ipc.o mini_ipc.o irq.o sha1.o
+OBJS = string.o sync.o time.o printf.o exception.o exception_2200.o malloc.o gecko.o ipc.o mini_ipc.o irq.o sha1.o input.o video_low.o font.o console.o
 NOLINKOBJS = crt0.o realmode.o
 
 include ../common/common.mk
+
+.PHONY: install
 
 install: $(TARGET)
 	@echo "  COPY      $(TARGET)"
@@ -31,6 +33,10 @@ install: $(TARGET)
 	@cp include/broadway/mini_ipc.h $(WIIDEV)/include/broadway/
 	@echo "  COPY      broadway.h"
 	@cp include/broadway.h $(WIIDEV)/include/
+	@echo "  COPY      console.h"
+	@cp include/console.h $(WIIDEV)/include/
+	@echo "  COPY      input.h"
+	@cp include/input.h $(WIIDEV)/include/
 	@echo "  COPY      malloc.h"
 	@cp include/malloc.h $(WIIDEV)/include/
 	@echo "  COPY      printf.h"
@@ -41,10 +47,16 @@ install: $(TARGET)
 	@cp include/sha1.h $(WIIDEV)/include/
 	@echo "  COPY      types.h"
 	@cp include/types.h $(WIIDEV)/include/
+	@echo "  COPY      video_low.h"
+	@cp include/video_low.h $(WIIDEV)/include/
 	@echo "  COPY      common.mk"
 	@cp ../common/common.mk $(WIIDEV)/
 	@echo "  COPY      starlet.mk"
 	@cp ../common/starlet.mk $(WIIDEV)/
 	@echo "  COPY      broadway.mk"
 	@cp ../common/broadway.mk $(WIIDEV)/
+	@echo "  COPY      ppc.ld"
+	@cp ../common/ppc.ld $(WIIDEV)/
+	@echo "  COPY      mini.ld"
+	@cp ../common/mini.ld $(WIIDEV)/
 

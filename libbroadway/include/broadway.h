@@ -2,7 +2,7 @@
                   also includes some functions that didn't have
                   a place anywhere else.
 
-Copyright (C) 2009		Alex Marshall <SquidMan72@gmail.com>
+Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 # This code is licensed to you under the terms of the GNU GPL, version 2;
 # see file COPYING or http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt

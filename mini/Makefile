@@ -4,10 +4,8 @@ endif
 
 include $(WIIDEV)/starlet.mk
 
-ASFLAGS += -D_LANGUAGE_ASSEMBLY
 CFLAGS += -DCAN_HAZ_IRQ -DCAN_HAZ_IPC
-LDSCRIPT = mini.ld
-LIBS = -lgcc
+CFLAGS += -DMINI_VERSION_MAJOR=1 -DMINI_VERSION_MINOR=2
 
 ELFLOADER = elfloader/elfloader.bin
 MAKEBIN = python makebin.py
@@ -29,9 +27,6 @@ $(TARGET_BIN): $(TARGET) $(ELFLOADER)
 	@echo  "MAKEBIN	$@"
 	@$(MAKEBIN) $(ELFLOADER) $< $@
 
-upload: $(TARGET_BIN)
-	@$(WIIDEV)/bin/bootmii -a $<
-	
 git_version.h:
 	@echo "  GITVER    $@"
 	@echo 'const char git_version[] = "'`./describesimple.sh`'";' > git_version.h
@@ -41,6 +36,7 @@ clean: myclean
 $(ELFLOADER):
 	make -C elfloader
 
+.PHONY: myclean
 myclean:
 	-rm -f $(TARGET_BIN) git_version.h
 	$(MAKE) -C elfloader clean
