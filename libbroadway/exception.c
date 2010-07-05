@@ -16,9 +16,11 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 
 extern char exception_2200_start, exception_2200_end;
 
+void exception_restorer() __attribute__ ((noreturn));
+void exception_handler(int exception) __attribute__((noreturn));
+
 void exception_handler(int exception)
 {
-	u32 was_on = irq_disable();
 	blink();
 	/* Check if the exception was actually an external interrupt */
 	if(exception == 0x500)
@@ -48,7 +50,12 @@ void exception_handler(int exception)
 		for(;;);
 	}
 	
-	irq_restore(was_on);
+	asm volatile(\
+		"b	%0\n" : : "i"(exception_restorer));
+	/* We won't return thanks to ^. Silly GCC :3
+	 * Let's throw in a for(;;); just to shut it up.
+	 */
+	for(;;);
 }
 
 void exception_init(void)

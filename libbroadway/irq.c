@@ -19,7 +19,10 @@ static int irqs_on = 0;
 static u32 bw_enabled_irq = 0;
 static u32 hw_enabled_irq = 0;
 static u32 msrvalue = 0;
+static u32 irq_bw_fired = 0;
+static u32 irq_bw_enabled = 0;
 u32 reset_pressed = 0;
+
 
 int irq_hw_register_handler(u32 irqn, int (*exec)(u32 irq, void* data), void* data)
 {
@@ -122,8 +125,10 @@ int _irq_bw_handler_hardware(u32 irq, void* data)
 	u32 flags = read32(HW_PPCIRQFLAG);
 	u32 useflags = flags & enabled;
 	
-	gfx_printf(" BW Fired: %08X *HW Fired: %08X\n", read32(HW_BWIRQFLAG), read32(HW_PPCIRQFLAG));
-	gfx_printf(" BW Mask:  %08X *HW Mask:  %08X\n", read32(HW_BWIRQMASK), read32(HW_PPCIRQMASK));
+	gfx_printf(" BW Fired: %08X *HW Fired: %08X\n", irq_bw_fired,   flags);
+	gfx_printf(" BW Mask:  %08X *HW Mask:  %08X\n", irq_bw_enabled, enabled);
+	if(useflags == 0) /* Spurious interrupt */
+		return;
 	for(i = 0; i < IRQ_HW_MAX; i++) {
 		printf("Interrupt check: %d.\n", i);
 		if(useflags & IRQF(i)) { 
@@ -209,9 +214,13 @@ void irq_handler(void)
 	u32 enabled = read32(HW_BWIRQMASK);
 	u32 flags = read32(HW_BWIRQFLAG);
 	u32 useflags = flags & enabled;
+	irq_bw_fired = flags;
+	irq_bw_enabled = enabled;
 
-	gfx_printf("*BW Fired: %08X  HW Fired: %08X\n", read32(HW_BWIRQFLAG), read32(HW_PPCIRQFLAG));
-	gfx_printf("*BW Mask:  %08X  HW Mask:  %08X\n", read32(HW_BWIRQMASK), read32(HW_PPCIRQMASK));
+	gfx_printf("*BW Fired: %08X  HW Fired: %08X\n", irq_bw_fired,   read32(HW_PPCIRQFLAG));
+	gfx_printf("*BW Mask:  %08X  HW Mask:  %08X\n", irq_bw_enabled, read32(HW_PPCIRQMASK));
+	if(useflags == 0) /* Spurious interrupt */
+		return;
 	for(i = 0; i < IRQ_BW_MAX; i++) {
 		printf("Interrupt check: %d.\n", i);
 		if(useflags & IRQF(i)) { 
@@ -229,6 +238,7 @@ void irq_handler(void)
 		printf("BWIRQ: unhandled 0x%08x\n", useflags);
 		write32(HW_BWIRQFLAG, useflags);
 	}
+	irq_bw_fired = 0;
 }
 
 void irq_bw_enable(u32 irq)
