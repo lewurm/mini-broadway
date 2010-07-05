@@ -44,7 +44,7 @@ static void gpio_init(void)
 {
 	// setup power and eject button hollywood IRQ for PPC
 	mask32(HW_GPIO1OWNER,           0, 0x41); // set GPIO owner to PPC
-	irq_hw_enable(IRQ_GPIO1B);
+	irq_hw_enable(IRQ_HW_GPIO1B);
 	mask32(HW_GPIO1BINTENABLE,      0, 0x41);
 	mask32(HW_GPIO1BINTLVL,         0, 0x41);
 }
@@ -58,7 +58,7 @@ void input_init(void)
 
 	// Check for any pending GPIO irq's, which should be ACK'd so we don't get ghost presses later.
 	// Try over and over again, until we are out of them.
-	while(read32(HW_PPCIRQFLAG) & IRQF_GPIO1B) {
+	while(read32(HW_PPCIRQFLAG) & IRQF_HW_GPIO1B) {
 		if (read32(HW_GPIO1INTFLAG) & 1) {
 			while(read32(HW_GPIO1BIN) & 1);
 			write32(HW_GPIO1BINTFLAG, 1);
@@ -66,7 +66,7 @@ void input_init(void)
 			write32(HW_GPIO1BINTFLAG, 0x40);
 		}
 
-		write32(HW_PPCIRQFLAG, IRQF_GPIO1B);
+		write32(HW_PPCIRQFLAG, IRQF_HW_GPIO1B);
 	}
 
 	// No IRQ's left to be ACK'd, continue our business.
@@ -108,7 +108,7 @@ u16 gpio_read(void)
 	u16 res = 0;
 	u32 irq_flag = 0;
 
-	if(!((read32(BW_PI_IRQFLAG) >> 16) & 1) && reset_delay == 0) {
+	if(!(read32(HW_BWIRQFLAG) & IRQF_BW_RESET_SW) && reset_delay == 0) {
 		res |= GPIO_RESET;
 		reset_delay = 5;
 	}
@@ -116,7 +116,7 @@ u16 gpio_read(void)
 	if(reset_delay > 0)
 		reset_delay--;
 
-	if(read32(HW_PPCIRQFLAG) & (1<<10)) {
+	if(read32(HW_PPCIRQFLAG) & IRQF_HW_GPIO1B) {
 		irq_flag = read32(HW_GPIO1INTFLAG);
 
 		if (irq_flag & 1) {
@@ -131,7 +131,7 @@ u16 gpio_read(void)
 			write32(HW_GPIO1BINTFLAG, 0x40);
 		}
 
-		write32(HW_PPCIRQFLAG, IRQF_GPIO1B); // ack GPIO irq
+		write32(HW_PPCIRQFLAG, IRQF_HW_GPIO1B); // ack GPIO irq
 	}
 
 	return res;

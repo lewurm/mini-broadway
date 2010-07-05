@@ -125,11 +125,11 @@ int main(void)
 	
 	gfx_printf("Turning on Hardware Broadway IRQ!\n");
 	usleep(DELAY_TIME);
-	irq_bw_enable(BW_PI_IRQ_HW);
+	irq_bw_enable(IRQ_BW_HW);
 	gfx_printf("Switching on some IRQs!\n");
 	usleep(DELAY_TIME);
-	irq_hw_enable(IRQ_PPCIPC);
-	irq_hw_enable(IRQ_RESET);
+	irq_hw_enable(IRQ_HW_PPCIPC);
+	irq_hw_enable(IRQ_HW_RESET);
 	gfx_printf("Initing hextwelve!\n");
 	usleep(DELAY_TIME);
 	if((ret = hextwelve_init())) {
@@ -140,7 +140,7 @@ int main(void)
 	gfx_printf("Initing hextwelve IRQs...\n");
 	usleep(DELAY_TIME);
 	/* external ohci */
-	irq_hw_enable(IRQ_OHCI0);
+	irq_hw_enable(IRQ_HW_OHCI0);
 	/* internal ohci */
 	//irq_hw_enable(IRQ_OHCI1);
 	

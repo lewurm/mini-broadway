@@ -16,28 +16,29 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #include <broadway.h>
 #include <string.h>
 
-int _irq_handler_ohci(u32 irq)
+int _irq_handler_ohci(u32 irq, void* data)
 {
 	u32 base;
 	switch(irq) {
 		default: /* Uhh... */
-		case IRQ_OHCI0:
+		case IRQ_HW_OHCI0:
 			base = OHCI0_REG_BASE;
 			break;
-		case IRQ_OHCI1:
+		case IRQ_HW_OHCI1:
 			base = OHCI1_REG_BASE;
 			break;
 	}
 	hcdi_irq(base);
+	(void)data;
 	return 1;
 }
 
 int hextwelve_init()
 {
 	int ret = 0;
-	if(!irq_register_handler(IRQ_OHCI0, _irq_handler_ohci))
+	if(!irq_hw_register_handler(IRQ_HW_OHCI0, _irq_handler_ohci, NULL))
 		ret |= 1;
-	if(!irq_register_handler(IRQ_OHCI1, _irq_handler_ohci))
+	if(!irq_hw_register_handler(IRQ_HW_OHCI1, _irq_handler_ohci, NULL))
 		ret |= 2;
 	return ret;
 }
@@ -45,11 +46,11 @@ int hextwelve_init()
 int hextwelve_quit()
 {
 	int ret = 0;
-	if(irq_get_handler(IRQ_OHCI0))
-		if(!irq_register_handler(IRQ_OHCI0, NULL))
+	if(irq_hw_get_handler(IRQ_HW_OHCI0).exec)
+		if(!irq_hw_register_handler(IRQ_HW_OHCI0, NULL, NULL))
 			ret |= 1;
-	if(irq_get_handler(IRQ_OHCI1))
-		if(!irq_register_handler(IRQ_OHCI1, NULL))
+	if(irq_hw_get_handler(IRQ_HW_OHCI1).exec)
+		if(!irq_hw_register_handler(IRQ_HW_OHCI1, NULL, NULL))
 			ret |= 2;
 	return ret;
 }
