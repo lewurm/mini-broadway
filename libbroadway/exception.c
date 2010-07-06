@@ -17,7 +17,8 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 extern char exception_2200_start, exception_2200_end;
 
 void exception_restorer() __attribute__ ((noreturn));
-void exception_handler(int exception) __attribute__((noreturn));
+void exception_finish() __attribute__ ((noreturn));
+void exception_handler(int exception) __attribute__ ((noreturn));
 
 void exception_handler(int exception)
 {
@@ -50,12 +51,8 @@ void exception_handler(int exception)
 		for(;;);
 	}
 	
-	asm volatile(\
-		"b	%0\n" : : "i"(exception_restorer));
-	/* We won't return thanks to ^. Silly GCC :3
-	 * Let's throw in a for(;;); just to shut it up.
-	 */
-	for(;;);
+	exception_finish();
+	for(;;); /* Never going to happen, just stops GCC from complaining. */
 }
 
 void exception_init(void)

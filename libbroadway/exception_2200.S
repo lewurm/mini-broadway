@@ -11,6 +11,7 @@ Copyright (C) 2010		Alex Marshall <trap15@raidenii.net>
 
 .globl exception_2200_start, exception_2200_end
 .globl exception_restorer
+.globl exception_finish
 
 exception_2200_start:
 	# store all interesting regs
@@ -33,10 +34,13 @@ exception_2200_start:
 
 	# Switch on FP, DR, IR
 	mfmsr	0
-	stw	0, 0x20a0(0)
 	ori	0, 0, 0x2030
 	mtsrr1	0
 
+	# Set up TOC and "kernel stack"
+	lis	2, 0x8000
+	lis	1,    kernel_stack_end@h
+	ori	1, 1, kernel_stack_end@l
 	# Go to C handler
 	lis	0,    exception_handler@h
 	ori	0, 0, exception_handler@l
@@ -45,31 +49,36 @@ exception_2200_start:
 exception_2200_end:
 
 exception_restorer:
-	li	1, 0
-	oris	1, 1, 0x8000
-	lwz	0, 0x2080(1)
-	mtcr	0
-	lwz	0, 0x2084(1)
-	mtxer	0
-#	lwz	0, 0x2088(1)
-#	mtlr	0
-	lwz	0, 0x208C(1)
+	lwz	0, 0x2094(0)
+	mtsrr1	0
+	lwz	0, 0x2090(0)
+	mtsrr0	0
+	lwz	0, 0x208c(0)
 	mtctr	0
-	lwz	0, 0x2090(1)
+	lwz	0, 0x2088(0)
 	mtlr	0
-#	mtsrr0	0
-	lwz	0, 0x2098(1)
-	mtdar	0
-	lwz	0, 0x209C(1)
-	mtdsisr	0
-	lwz	0, 0x20A0(1)
-	lwz	3, 0x2094(1)
-	mtsrr1	3
-#	andi.	3, 3, 0xFF73
-#	andi.	0, 0, 0x008C
-#	or	0, 0, 4
-#	mtmsr	0
-	lmw	2, 0x2008(1)
-	lwz	0, 0x2000(1)
-	lwz	1, 0x2004(1)
-	blr
+	lwz	0, 0x2084(0)
+	mtxer	0
+	lwz	0, 0x2080(0)
+	mtcr	0
+
+	lmw	1, 0x2004(0)
+	lwz	0, 0x2000(0)
+	rfi
+
+exception_finish:
+	# Load up exception_restorer to be called
+	lis	0,    exception_restorer@h
+	ori	0, 0, exception_restorer@l
+	mtsrr0	0
+	# Turn off EE, DR
+	mfmsr	0
+	ori	0, 0, 0x8010
+	xori	0, 0, 0x8010
+	mtsrr1	0
+	rfi
+
+kernel_stack:
+	.space	0x8000	# Just to be safe
+kernel_stack_end:
+	.space	0x1000	# Just to be safe

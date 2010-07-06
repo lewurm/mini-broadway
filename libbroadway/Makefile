@@ -6,7 +6,7 @@ INCLUDES += -Iinclude
 
 TARGET = libbroadway.a
 
-OBJS = string.o sync.o time.o printf.o exception.o exception_2200.o malloc.o gecko.o ipc.o mini_ipc.o irq.o sha1.o input.o video_low.o font.o console.o
+OBJS = string.o sync.o time.o printf.o exception.o exception_2200.o malloc.o gecko.o ipc.o mini_ipc.o irq.o sha1.o input.o video_low.o font.o console.o lists.o
 NOLINKOBJS = crt0.o realmode.o
 
 include ../common/common.mk
@@ -37,6 +37,8 @@ install: $(TARGET)
 	@cp include/console.h $(WIIDEV)/include/
 	@echo "  COPY      input.h"
 	@cp include/input.h $(WIIDEV)/include/
+	@echo "  COPY      lists.h"
+	@cp include/lists.h $(WIIDEV)/include/
 	@echo "  COPY      malloc.h"
 	@cp include/malloc.h $(WIIDEV)/include/
 	@echo "  COPY      printf.h"

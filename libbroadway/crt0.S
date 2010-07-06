@@ -118,12 +118,14 @@ _start:
 	bl	memset
 	
 	# Branch to the user code!
+mainlooping:
 	bl	main
 	# If the main function returns, then just loop endlessly.
 	
 	# trap15s note:
 	# Maybe we could do something else here ;)
 	# Possibly have a "return to loader" deal?
+	b	mainlooping
 	b	.
 
 InitHardware:
