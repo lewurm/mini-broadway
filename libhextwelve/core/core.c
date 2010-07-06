@@ -160,7 +160,7 @@ struct usb_device *usb_add_device(u8 lowspeed, u32 reg)
 	list_add_tail(core.devices, tmp);
 
 	usb_probe_driver();
-
+	printf("add device finished\n");
 	return dev;
 }
 

@@ -66,8 +66,11 @@ void usb_hidkb_probe()
 		if(dev->conf->intf->bInterfaceClass == HID_CLASSCODE &&
 				dev->conf->intf->bInterfaceSubClass == 1 && /* keyboard support boot protocol? */
 				dev->conf->intf->bInterfaceProtocol == 1) { /* keyboard? */
+			printf("Identified device at 0x%08X as HIDKB\n", dev);
 			hidkb.data = (void*) dev;
+			printf("Setting idle\n");
 			usb_hidkb_set_idle(dev, 1);
+			printf("Set idle\n");
 		}
 
 		iterator=iterator->next;
@@ -88,6 +91,7 @@ void usb_hidkb_check()
 
 u8 usb_hidkb_inuse()
 {
+	printf("kbdata: %s\n", hidkb.data ? "YES" : "NO");
 	return hidkb.data ? 1 : 0;
 }
 

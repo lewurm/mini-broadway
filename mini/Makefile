@@ -5,7 +5,7 @@ endif
 include $(WIIDEV)/starlet.mk
 
 CFLAGS += -DCAN_HAZ_IRQ -DCAN_HAZ_IPC
-CFLAGS += -DMINI_VERSION_MAJOR=1 -DMINI_VERSION_MINOR=2
+CFLAGS += -DMINI_VERSION_MAJOR=1 -DMINI_VERSION_MINOR=4
 
 ELFLOADER = elfloader/elfloader.bin
 MAKEBIN = python makebin.py
@@ -27,17 +27,17 @@ $(TARGET_BIN): $(TARGET) $(ELFLOADER)
 	@echo  "MAKEBIN	$@"
 	@$(MAKEBIN) $(ELFLOADER) $< $@
 
-git_version.h:
+git_version.h: describesimple.sh
 	@echo "  GITVER    $@"
 	@echo 'const char git_version[] = "'`./describesimple.sh`'";' > git_version.h
 
 clean: myclean
 
 $(ELFLOADER):
-	make -C elfloader
+	@$(MAKE) -C elfloader
 
 .PHONY: myclean
 myclean:
 	-rm -f $(TARGET_BIN) git_version.h
-	$(MAKE) -C elfloader clean
+	@$(MAKE) -C elfloader clean
 

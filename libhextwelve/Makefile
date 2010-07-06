@@ -10,7 +10,7 @@ INCLUDES += -Iinclude
 CFLAGS += -Wno-unused-parameter 
 
 #debug flags; DU = Debug USB
-CFLAGS  += -D_DU_OHCI_F      # fire @ u/h/ohci.c
+#CFLAGS += -D_DU_OHCI_F      # fire @ u/h/ohci.c
 CFLAGS  += -D_DU_OHCI_F_HALT # halted @ u/h/ohci.c
 CFLAGS  += -D_DU_OHCI_Q      # enqueue @ u/h/ohci.c
 CFLAGS  += -D_DU_OHCI_RH     # roothub @ u/h/ohci.c

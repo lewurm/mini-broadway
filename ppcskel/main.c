@@ -21,9 +21,7 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #include <diskmii/nandfs.h>
 #include <diskmii.h>
 #include <diskmii/diskio.h>
-#include <hextwelve.h>
-#include <hextwelve/core/core.h>
-#include <hextwelve/drivers/class/hid.h>
+#include <cereal.h>
 #include <video_low.h>
 #include <input.h>
 #include <console.h>
@@ -31,11 +29,12 @@ Copyright (C) 2009-2010		Alex Marshall <trap15@raidenii.net>
 #define DELAY_TIME		(500000)
 #define IRQ_STABLE_TIME		(1000000)
 
-#define MINIMUM_MINI_VERSION	(0x00010002)
+#define MINIMUM_MINI_VERSION	(0x00010004)
 
 char spinchrs[5] = "|/-\\";
 otp_t otp;
 seeprom_t seeprom;
+int omgmagicalfairyponies = 1;
 
 static void dsp_reset(void)
 {
@@ -87,7 +86,6 @@ void testOTP(void)
 int main(void)
 {
 	u16 ret;
-	u32 was_on;
 	int vmode = -1;
 	exception_init();
 	dsp_reset();
@@ -130,42 +128,43 @@ int main(void)
 	usleep(DELAY_TIME);
 	irq_hw_enable(IRQ_HW_PPCIPC);
 	irq_hw_enable(IRQ_HW_RESET);
-	gfx_printf("Initing hextwelve!\n");
+#if 0
+	gfx_printf("Initing libcereal!\n");
 	usleep(DELAY_TIME);
-	if((ret = hextwelve_init())) {
-		gfx_printf("Unable to init hextwelve %d! bailing!\n", ret);
+	if((ret = cereal_init())) {
+		gfx_printf("Unable to init libcereal %d! bailing!\n", ret);
 		return 1;
 	}
 	gfx_printf("Success.\n");
-	gfx_printf("Initing hextwelve IRQs...\n");
+	gfx_printf("Initing USB IRQs...\n");
 	usleep(DELAY_TIME);
 	/* external ohci */
 	irq_hw_enable(IRQ_HW_OHCI0);
 	/* internal ohci */
-	//irq_hw_enable(IRQ_OHCI1);
+	//irq_hw_enable(IRQ_HW_OHCI1);
 	
-	gfx_printf("Initing hextwelve USB driver...\n");
+	gfx_printf("Initing libcereal USB driver...\n");
 	usleep(DELAY_TIME);
 	/* external ohci */
-	usb_init(OHCI0_REG_BASE);
+	cereal_install(IRQ_HW_OHCI0);
 
 	/* internal ohci */
-	//usb_init(OHCI1_REG_BASE);
+	//cereal_install(IRQ_HW_OHCI1);
 
-	gfx_printf("Loading hextwelve HID Keyboard driver...\n");
+	gfx_printf("Loading HID Keyboard driver...\n");
 	usleep(DELAY_TIME);
 	/* load HID keyboard driver */
-	usb_hidkb_init();
-
-	gfx_printf("Waiting for IRQs to stabilize...\n");
-	usleep(IRQ_STABLE_TIME);
-wait_kb:
+#endif
+	
 	/* wait for usb keyboard plugged in */
-	if(!usb_hidkb_inuse()) {
+	if(omgmagicalfairyponies/* Keyboard plugged in */) {
 		gfx_printf("plug in a usb keyboard");
 	}
-	while(!usb_hidkb_inuse()) {
+	while(omgmagicalfairyponies/* Keyboard plugged in */) {
+//		printf("Spinning...\n");
+		usleep(20);
 		if(reset_pressed) {
+			omgmagicalfairyponies = 0;
 			gfx_printf("Reset hit...\n");
 			usleep(DELAY_TIME * 20);
 			gfx_printf("Load Sysmenu...\n");
@@ -175,97 +174,24 @@ wait_kb:
 	}
 
 	gfx_printf("hello keyboard :)");
-
-#define FONT_WIDTH  13
-#define FONT_HEIGHT 15
-#define STDOUT_BORDER_LEFT 20
-#define STDOUT_BORDER_RIGHT 650
-#define STDOUT_BORDER_TOP 20
-#define STDOUT_BORDER_BOTTOM 550
-#define TABSIZE 4
-	/* you are welcome to make this nice :) */
-	char str[7];
-	u16 i, j, y=STDOUT_BORDER_TOP, x=STDOUT_BORDER_LEFT;
-	u16 old_x, old_y;
-	struct kbrep *k, *old=NULL;
-
-	while(usb_hidkb_inuse()) {
-		memset(str, '\0', 7);
-		k = usb_hidkb_getChars();
-		j=0;
-		old_x = x; /* save actual x and y position for printing after the loop */
-		old_y = y;
-		for(i=0; k->keys[i]>0; i++) {
-
-			/* dropping char's if necessary */
-			if(old) {
-				for(j=0; j < 6; j++) {
-					if(old->keys[j] == k->keys[i]) {
-						ret = 1;
-						break;
-					}
-				}
-			}
-			if(ret) {
-				ret = 0;
-				continue;
-			}
-			j = 0;
-
-			unsigned char key = usb_hidkb_get_char_from_keycode(k->keys[i],
-					(k->mod & MOD_lshift) || (k->mod & MOD_rshift));
-			/* no key or key not relevant? next, please. */
-			if (key == 0)
-				continue;
-
-			/* RETURN pressed? */
-			if (key == '\n') {
-				x = STDOUT_BORDER_LEFT;
-				y += FONT_HEIGHT;
-				printf("\n");
-			/* TAB pressed? */
-			} else if (key == '\t') {
-				x += (TABSIZE*FONT_WIDTH);
-				printf("\t");
-
-			/* BACKSPACE pressed? */
-			} else if (key == '\r') {
-				/* TODO */
-
-			/* now we have only printable characters left */
-			} else {
-				x += FONT_WIDTH;
-				str[j] = key;
-				j++;
-			}
-
-			/* line full? break! */
-			if(x > (STDOUT_BORDER_RIGHT-FONT_WIDTH)) {
-				x = STDOUT_BORDER_LEFT;
-				y += FONT_HEIGHT;
-			}
-			/* screen full? start again at top */
-			if(y > (STDOUT_BORDER_BOTTOM-FONT_HEIGHT)) {
-				y = STDOUT_BORDER_TOP;
-			}
-		}
-		if(old) {
-			free(old);
-		}
-		old = k;
-		if(j > 0) { /* when there was any printable stuff, show it */
-			print_str_noscroll(old_x, old_y, str);
-			printf("%s", str);
-		}
-	}
-
-	goto wait_kb;
-
+	
+	/* Do Keyboard shit here */
+	
 	gfx_printf("===============================\n");
 
 	gfx_printf("bye, world!\n");
 
-	hextwelve_quit();
+#if 0
+	gfx_printf("Deiniting libcereal USB driver...\n");
+	usleep(DELAY_TIME);
+	/* external ohci */
+	cereal_uninstall(IRQ_HW_OHCI0);
+	/* internal ohci */
+	//cereal_uninstall(IRQ_HW_OHCI1);
+	
+	cereal_quit();
+#endif
+	
 	return 0;
 }
 

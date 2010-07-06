@@ -20,12 +20,12 @@ endif
 
 DEPDIR = .deps
 
+CFLAGS	+= $(INCLUDES)
+
 ifeq ($(MAKING_LIBBROADWAY),)
 CFLAGS	+= -I$(WIIDEV)/include
 LDFLAGS	+= -L$(WIIDEV)/lib
 endif
-
-CFLAGS	+= $(INCLUDES)
 
 .PHONY: all clean upload
 

@@ -1,4 +1,8 @@
-include ../../common/starlet.mk
+ifeq ($(strip $(WIIDEV)),)
+$(error "Set WIIDEV in your environment.")
+endif
+
+include $(WIIDEV)/starlet.mk
 
 CFLAGS += -fpic
 LDSCRIPT = stub.ld
@@ -8,7 +12,7 @@ TARGET = elfloader.elf
 TARGET_BIN = elfloader.bin
 OBJS = start.o stub.o ../string.o utils.o
 
-include ../../common/common.mk
+include $(WIIDEV)/common.mk
 
 all: $(TARGET_BIN)
 
