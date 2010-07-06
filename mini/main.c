@@ -79,11 +79,11 @@ u32 _main(void *base)
 		goto shutdown;
 	}
 
-	if (read32(0x3130) == 0xFFFFFFFF) {
+/*	if (read32(0x3130) == 0xFFFFFFFF) {
 		gecko_printf("GameCube shutdown detected, bypassing.\n");
-		vector = boot2_run(1,2);
+		vector = boot2_run(1, 2);
 		goto shutdown;
-	}
+	}*/
 	
 	gecko_printf("Initializing SDHC...\n");
 	sdhc_init();
