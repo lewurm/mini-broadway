@@ -1,0 +1,3 @@
+A USB stack written from scratch.
+Will initially only implement OHCI, but will implement EHCI in the future.
+
